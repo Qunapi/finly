@@ -1,3 +1,5 @@
+import type { OverpaymentMode } from "./mortgage";
+
 export type CalculatorState = {
   tab: "salary" | "mortgage";
   amount: number;
@@ -9,6 +11,8 @@ export type CalculatorState = {
   downPaymentPercent: number;
   rate: number;
   years: number;
+  monthlyOverpayment: number;
+  overpaymentMode: OverpaymentMode;
 };
 
 export const defaultCalculatorState: CalculatorState = {
@@ -17,11 +21,13 @@ export const defaultCalculatorState: CalculatorState = {
   youthRelief: true,
   copyrightKup: true,
   ppk: true,
-  loan: 400000,
-  propertyPrice: 500000,
+  loan: 120000,
+  propertyPrice: 150000,
   downPaymentPercent: 20,
   rate: 6.5,
   years: 30,
+  monthlyOverpayment: 0,
+  overpaymentMode: "payment",
 };
 
 export function parseCalculatorQuery(search: string, pathname = ""): CalculatorState {
@@ -55,13 +61,16 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
     loan: Math.round(propertyPrice * (1 - downPaymentPercent / 100) * 100) / 100,
     rate: number("rate", defaultCalculatorState.rate, 0, 30),
     years: number("years", defaultCalculatorState.years, 1, 40),
+    monthlyOverpayment: number("overpay", 0, 0, 6250000),
+    overpaymentMode: params.get("mode") === "duration" ? "duration" : "payment",
   };
 }
 
 export function writeCalculatorQuery(search: string, state: CalculatorState): string {
   const params = new URLSearchParams(search);
   params.delete("tab");
-  for (const key of ["amount", "youth", "kup", "ppk", "loan", "price", "down", "rate", "years"]) params.delete(key);
+  for (const key of ["amount", "youth", "kup", "ppk", "loan", "price", "down", "rate", "years", "overpay", "mode"])
+    params.delete(key);
   if (state.tab === "salary") {
     params.set("amount", String(state.amount));
     params.set("youth", state.youthRelief ? "1" : "0");
@@ -72,6 +81,8 @@ export function writeCalculatorQuery(search: string, state: CalculatorState): st
     params.set("down", String(state.downPaymentPercent));
     params.set("rate", String(state.rate));
     params.set("years", String(state.years));
+    params.set("overpay", String(state.monthlyOverpayment));
+    params.set("mode", state.overpaymentMode);
   }
   return params.toString();
 }

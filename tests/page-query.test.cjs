@@ -31,6 +31,8 @@ test("calculator query restores shareable inputs and preserves unrelated params"
     downPaymentPercent: 20,
     rate: 6.5,
     years: 20,
+    monthlyOverpayment: 0,
+    overpaymentMode: "payment",
   });
   assert.match(writeCalculatorQuery("?campaign=spring", state), /campaign=spring/);
   assert.deepEqual(parseCalculatorQuery(`?${writeCalculatorQuery("", state)}`, "/mortgage/"), {
@@ -93,10 +95,12 @@ test("query contains only active calculator settings and the default rate is 6.5
     ),
     {
       campaign: "test",
-      price: "500000",
+      price: "150000",
       down: "20",
       rate: "6.5",
       years: "30",
+      overpay: "0",
+      mode: "payment",
     },
   );
 });
@@ -105,7 +109,7 @@ test("mortgage price and down payment determine the loan and survive sharing", (
   const { parseCalculatorQuery, writeCalculatorQuery } = queryModule.exports;
   const defaults = parseCalculatorQuery("", "/mortgage");
   assert.equal(defaults.downPaymentPercent, 20);
-  assert.equal(defaults.loan, 400000);
+  assert.equal(defaults.loan, 120000);
   const state = parseCalculatorQuery("?price=750000&down=10&campaign=test", "/mortgage");
   assert.equal(state.loan, 675000);
   assert.deepEqual(parseCalculatorQuery(writeCalculatorQuery("?campaign=test", state), "/mortgage"), state);
@@ -115,4 +119,15 @@ test("mortgage price and down payment determine the loan and survive sharing", (
   assert.equal(parseCalculatorQuery("?price=0&down=20").loan, 0);
   assert.equal(parseCalculatorQuery("?price=500000&down=150").loan, 0);
   assert.equal(parseCalculatorQuery("?price=500000&down=20&loan=1").loan, 400000);
+});
+
+test("overpayment settings restore, validate and remain shareable", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery } = queryModule.exports;
+  const state = parseCalculatorQuery("?price=1000000&down=30&overpay=1500&mode=duration", "/mortgage");
+  assert.equal(state.monthlyOverpayment, 1500);
+  assert.equal(state.overpaymentMode, "duration");
+  assert.deepEqual(parseCalculatorQuery(writeCalculatorQuery("", state), "/mortgage"), state);
+  const invalid = parseCalculatorQuery("?overpay=-1&mode=bad");
+  assert.equal(invalid.monthlyOverpayment, 0);
+  assert.equal(invalid.overpaymentMode, "payment");
 });

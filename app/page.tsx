@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { fetchExchangeRates, type ExchangeRates } from "./lib/exchange-rates";
 import { calculateSalary, findEquivalentAmount } from "./lib/salary";
-import { calculateMortgage } from "./lib/mortgage";
+import { calculateMortgage, type OverpaymentMode } from "./lib/mortgage";
 import {
   defaultCalculatorState,
   parseCalculatorQuery,
@@ -28,10 +28,13 @@ export default function Home() {
   const loan = Math.round((propertyPrice - downPayment) * 100) / 100;
   const [rate, setRate] = useState(defaultCalculatorState.rate);
   const [years, setYears] = useState(30);
+  const [monthlyOverpayment, setMonthlyOverpayment] = useState(0);
+  const [overpaymentMode, setOverpaymentMode] = useState<OverpaymentMode>("payment");
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null);
   const [ratesUnavailable, setRatesUnavailable] = useState(false);
   const result = calculateSalary(amount, youthRelief, copyrightKup, ppk);
-  const mortgage = calculateMortgage(loan, rate, years);
+  const mortgage = calculateMortgage(loan, rate, years, monthlyOverpayment, overpaymentMode);
+  const baselineMortgage = calculateMortgage(loan, rate, years);
   const b2bEquivalent = findEquivalentAmount(result.uopNet, "b2b", youthRelief, copyrightKup, ppk);
   const uopEquivalent = findEquivalentAmount(result.b2bNet, "uop", youthRelief, copyrightKup, ppk);
   const better = result.b2bNet >= result.uopNet ? "B2B" : "UoP";
@@ -62,6 +65,8 @@ export default function Home() {
     setDownPaymentPercent(state.downPaymentPercent);
     setRate(state.rate);
     setYears(state.years);
+    setMonthlyOverpayment(state.monthlyOverpayment);
+    setOverpaymentMode(state.overpaymentMode);
     setQueryLoaded(true);
   }, []);
 
@@ -78,13 +83,29 @@ export default function Home() {
       downPaymentPercent,
       rate,
       years,
+      monthlyOverpayment,
+      overpaymentMode,
     });
     window.history.replaceState(
       null,
       "",
       `${writeCalculatorPath(window.location.pathname, tab)}?${query}${window.location.hash}`,
     );
-  }, [queryLoaded, tab, amount, youthRelief, copyrightKup, ppk, loan, propertyPrice, downPaymentPercent, rate, years]);
+  }, [
+    queryLoaded,
+    tab,
+    amount,
+    youthRelief,
+    copyrightKup,
+    ppk,
+    loan,
+    propertyPrice,
+    downPaymentPercent,
+    rate,
+    years,
+    monthlyOverpayment,
+    overpaymentMode,
+  ]);
 
   return (
     <main className="shell">
@@ -244,17 +265,48 @@ export default function Home() {
                 onChange={setPropertyPrice}
                 max={6250000}
               />
+              <div className="quick-amounts" aria-label="Szybki wybór ceny mieszkania">
+                {[1200000, 1000000, 800000, 1700000, 2000000].map((price) => (
+                  <button
+                    key={price}
+                    type="button"
+                    aria-pressed={propertyPrice === price}
+                    onClick={() => setPropertyPrice(price)}
+                  >
+                    {new Intl.NumberFormat("pl-PL").format(price)}
+                  </button>
+                ))}
+              </div>
               <MoneyInput
                 id="down-payment"
                 label="Wkład własny"
-                value={downPaymentPercent}
+                value={Number(downPaymentPercent.toFixed(6))}
                 onChange={setDownPaymentPercent}
                 max={100}
                 step={1}
                 suffix="%"
               />
+              <div className="quick-amounts" aria-label="Szybki wybór wkładu własnego">
+                {[10, 20, 30, 40].map((percent) => (
+                  <button
+                    key={percent}
+                    type="button"
+                    aria-pressed={downPaymentPercent === percent}
+                    onClick={() => setDownPaymentPercent(percent)}
+                  >
+                    {percent}%
+                  </button>
+                ))}
+              </div>
+              <MoneyInput
+                id="down-payment-amount"
+                label="Wkład własny w złotych"
+                value={downPayment}
+                onChange={(value) => setDownPaymentPercent(propertyPrice ? (value / propertyPrice) * 100 : 0)}
+                max={propertyPrice}
+                step={0.01}
+              />
               <div aria-live="polite">
-                <Breakdown label="Wkład własny" value={downPayment} />
                 <Breakdown label="Kwota kredytu" value={loan} />
               </div>
               <MoneyInput
@@ -280,6 +332,35 @@ export default function Home() {
                 />
                 <span>lat</span>
               </div>
+              <MoneyInput
+                id="overpayment"
+                label="Nadpłata miesięczna"
+                value={monthlyOverpayment}
+                onChange={setMonthlyOverpayment}
+                max={6250000}
+                step={100}
+              />
+              <fieldset className="overpayment-options">
+                <legend>Cel nadpłaty</legend>
+                <label className="check-option">
+                  <input
+                    type="radio"
+                    name="overpayment-mode"
+                    checked={overpaymentMode === "payment"}
+                    onChange={() => setOverpaymentMode("payment")}
+                  />{" "}
+                  Zmniejszenie raty
+                </label>
+                <label className="check-option">
+                  <input
+                    type="radio"
+                    name="overpayment-mode"
+                    checked={overpaymentMode === "duration"}
+                    onChange={() => setOverpaymentMode("duration")}
+                  />{" "}
+                  Skrócenie okresu spłaty
+                </label>
+              </fieldset>
             </div>
             <article className="result-card mortgage-result">
               <p className="eyebrow">RATA MIESIĘCZNA</p>
@@ -298,8 +379,53 @@ export default function Home() {
               <Breakdown label="Łączne odsetki" value={mortgage.interest} />
               <div className="divider" />
               <Breakdown label="Całkowita kwota do spłaty" value={mortgage.total} />
+              <Breakdown
+                label="Oszczędność na odsetkach"
+                value={Math.max(0, baselineMortgage.interest - mortgage.interest)}
+              />
+              <p className="mortgage-footnote">
+                Spłata w {mortgage.months} mies. · Rata powyżej dotyczy pierwszego miesiąca, bez nadpłaty. Nadpłata na
+                koniec każdego miesiąca; oprocentowanie stałe w symulacji.
+              </p>
               <p className="mortgage-footnote">Szacunek dla rat równych. Rzeczywista oferta banku może się różnić.</p>
             </article>
+          </section>
+          <section className="payment-schedule" aria-label="Harmonogram spłaty">
+            <h2>Harmonogram spłaty</h2>
+            <div
+              className="table-scroll"
+              tabIndex={0}
+              role="region"
+              aria-label="Tabela rat — przewijaj, aby zobaczyć wszystkie płatności"
+            >
+              <table>
+                <caption>Raty i nadpłaty miesięczne w PLN</caption>
+                <thead>
+                  <tr>
+                    <th scope="col">Miesiąc</th>
+                    <th scope="col">Rata</th>
+                    <th scope="col">Odsetki</th>
+                    <th scope="col">Kapitał z nadpłatą</th>
+                    <th scope="col">Nadpłata</th>
+                    <th scope="col">Łączna płatność</th>
+                    <th scope="col">Pozostało</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {mortgage.schedule.map((row) => (
+                    <tr key={row.month}>
+                      <th scope="row">{row.month}</th>
+                      {[row.payment, row.interest, row.principal, row.overpayment, row.total, row.balance].map(
+                        (value, index) => (
+                          <td key={index}>{exactMoney.format(value)}</td>
+                        ),
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              {!mortgage.schedule.length && <p>Brak rat do spłaty.</p>}
+            </div>
           </section>
         </>
       )}
