@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { numberFormat, parseNumberInput } from "./lib/number-format";
 import { fetchExchangeRates, type ExchangeRates } from "./lib/exchange-rates";
 import { calculateSalary, findEquivalentAmount } from "./lib/salary";
 import { calculateMortgage, type OverpaymentMode } from "./lib/mortgage";
@@ -11,9 +12,24 @@ import {
   writeCalculatorPath,
 } from "./lib/page-query";
 
-const exactMoney = new Intl.NumberFormat("pl-PL", { style: "currency", currency: "PLN", minimumFractionDigits: 2 });
-const dollars = new Intl.NumberFormat("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 2 });
-const euros = new Intl.NumberFormat("de-DE", { style: "currency", currency: "EUR", maximumFractionDigits: 2 });
+const exactMoney = new Intl.NumberFormat("pl-PL", {
+  useGrouping: "always",
+  style: "currency",
+  currency: "PLN",
+  minimumFractionDigits: 2,
+});
+const dollars = new Intl.NumberFormat("pl-PL", {
+  useGrouping: "always",
+  style: "currency",
+  currency: "USD",
+  maximumFractionDigits: 2,
+});
+const euros = new Intl.NumberFormat("pl-PL", {
+  useGrouping: "always",
+  style: "currency",
+  currency: "EUR",
+  maximumFractionDigits: 2,
+});
 const quickAmounts = [20000, 25000, 30000, 40000, 50000, 60000];
 export default function Home() {
   const [tab, setTab] = useState<"salary" | "mortgage">("salary");
@@ -28,7 +44,7 @@ export default function Home() {
   const loan = Math.round((propertyPrice - downPayment) * 100) / 100;
   const [rate, setRate] = useState(defaultCalculatorState.rate);
   const [years, setYears] = useState(30);
-  const [monthlyOverpayment, setMonthlyOverpayment] = useState(0);
+  const [monthlyOverpayment, setMonthlyOverpayment] = useState(defaultCalculatorState.monthlyOverpayment);
   const [overpaymentMode, setOverpaymentMode] = useState<OverpaymentMode>("payment");
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null);
   const [ratesUnavailable, setRatesUnavailable] = useState(false);
@@ -139,14 +155,7 @@ export default function Home() {
             <div className="input-panel">
               <label htmlFor="amount">Miesięczne wynagrodzenie brutto / faktura netto</label>
               <div className="amount-input">
-                <input
-                  id="amount"
-                  type="number"
-                  min="0"
-                  step="1000"
-                  value={amount}
-                  onChange={(event) => setAmount(Math.max(0, Number(event.target.value) || 0))}
-                />
+                <NumberInput id="amount" value={amount} onChange={setAmount} max={Number.MAX_SAFE_INTEGER} />
                 <span>PLN</span>
               </div>
               <input
@@ -273,7 +282,7 @@ export default function Home() {
                     aria-pressed={propertyPrice === price}
                     onClick={() => setPropertyPrice(price)}
                   >
-                    {new Intl.NumberFormat("pl-PL").format(price)}
+                    {numberFormat.format(price)}
                   </button>
                 ))}
               </div>
@@ -283,7 +292,6 @@ export default function Home() {
                 value={Number(downPaymentPercent.toFixed(6))}
                 onChange={setDownPaymentPercent}
                 max={100}
-                step={1}
                 suffix="%"
               />
               <div className="quick-amounts" aria-label="Szybki wybór wkładu własnego">
@@ -304,7 +312,6 @@ export default function Home() {
                 value={downPayment}
                 onChange={(value) => setDownPaymentPercent(propertyPrice ? (value / propertyPrice) * 100 : 0)}
                 max={propertyPrice}
-                step={0.01}
               />
               <div aria-live="polite">
                 <Breakdown label="Kwota kredytu" value={loan} />
@@ -315,21 +322,13 @@ export default function Home() {
                 value={rate}
                 onChange={(value) => setRate(Math.min(30, value))}
                 max={30}
-                step={0.05}
                 suffix="%"
               />
               <label className="term-label" htmlFor="years">
                 Okres spłaty
               </label>
               <div className="amount-input term-input">
-                <input
-                  id="years"
-                  type="number"
-                  min="1"
-                  max="40"
-                  value={years}
-                  onChange={(event) => setYears(Math.min(40, Math.max(1, Number(event.target.value) || 1)))}
-                />
+                <NumberInput id="years" value={years} onChange={setYears} min={1} max={40} />
                 <span>lat</span>
               </div>
               <MoneyInput
@@ -338,7 +337,6 @@ export default function Home() {
                 value={monthlyOverpayment}
                 onChange={setMonthlyOverpayment}
                 max={6250000}
-                step={100}
               />
               <fieldset className="overpayment-options">
                 <legend>Cel nadpłaty</legend>
@@ -477,7 +475,6 @@ function MoneyInput({
   label,
   value,
   onChange,
-  step = 500,
   suffix = "PLN",
   max,
 }: {
@@ -485,7 +482,6 @@ function MoneyInput({
   label: string;
   value: number;
   onChange: (value: number) => void;
-  step?: number;
   suffix?: string;
   max: number;
 }) {
@@ -493,17 +489,44 @@ function MoneyInput({
     <div className="mortgage-field">
       <label htmlFor={id}>{label}</label>
       <div className="amount-input">
-        <input
-          id={id}
-          type="number"
-          min="0"
-          max={max}
-          step={step}
-          value={value}
-          onChange={(event) => onChange(Math.min(max, Math.max(0, Number(event.target.value) || 0)))}
-        />
+        <NumberInput id={id} value={value} onChange={onChange} max={max} />
         <span>{suffix}</span>
       </div>
     </div>
+  );
+}
+
+function NumberInput({
+  id,
+  value,
+  onChange,
+  min = 0,
+  max,
+}: {
+  id: string;
+  value: number;
+  onChange: (value: number) => void;
+  min?: number;
+  max: number;
+}) {
+  // Keep a draft while editing so decimal separators, deletion and the caret behave naturally.
+  const [draft, setDraft] = useState<string | null>(null);
+  return (
+    <input
+      id={id}
+      type="text"
+      inputMode="decimal"
+      autoComplete="off"
+      value={draft ?? numberFormat.format(value)}
+      onFocus={() => setDraft(numberFormat.format(value))}
+      onChange={(event) => {
+        const text = event.target.value;
+        const parsed = parseNumberInput(text);
+        if (parsed === null) return;
+        setDraft(text);
+        onChange(Math.min(max, Math.max(min, parsed)));
+      }}
+      onBlur={() => setDraft(null)}
+    />
   );
 }

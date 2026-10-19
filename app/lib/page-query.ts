@@ -26,7 +26,7 @@ export const defaultCalculatorState: CalculatorState = {
   downPaymentPercent: 20,
   rate: 6.5,
   years: 30,
-  monthlyOverpayment: 0,
+  monthlyOverpayment: 15000,
   overpaymentMode: "payment",
 };
 
@@ -61,7 +61,7 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
     loan: Math.round(propertyPrice * (1 - downPaymentPercent / 100) * 100) / 100,
     rate: number("rate", defaultCalculatorState.rate, 0, 30),
     years: number("years", defaultCalculatorState.years, 1, 40),
-    monthlyOverpayment: number("overpay", 0, 0, 6250000),
+    monthlyOverpayment: number("overpay", defaultCalculatorState.monthlyOverpayment, 0, 6250000),
     overpaymentMode: params.get("mode") === "duration" ? "duration" : "payment",
   };
 }

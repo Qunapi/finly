@@ -31,7 +31,7 @@ test("calculator query restores shareable inputs and preserves unrelated params"
     downPaymentPercent: 20,
     rate: 6.5,
     years: 20,
-    monthlyOverpayment: 0,
+    monthlyOverpayment: 15000,
     overpaymentMode: "payment",
   });
   assert.match(writeCalculatorQuery("?campaign=spring", state), /campaign=spring/);
@@ -99,7 +99,7 @@ test("query contains only active calculator settings and the default rate is 6.5
       down: "20",
       rate: "6.5",
       years: "30",
-      overpay: "0",
+      overpay: "15000",
       mode: "payment",
     },
   );
@@ -130,4 +130,10 @@ test("overpayment settings restore, validate and remain shareable", () => {
   const invalid = parseCalculatorQuery("?overpay=-1&mode=bad");
   assert.equal(invalid.monthlyOverpayment, 0);
   assert.equal(invalid.overpaymentMode, "payment");
+});
+
+test("default monthly overpayment is 15000 and an explicit zero is preserved", () => {
+  const { parseCalculatorQuery } = queryModule.exports;
+  assert.equal(parseCalculatorQuery("", "/mortgage").monthlyOverpayment, 15000);
+  assert.equal(parseCalculatorQuery("?overpay=0", "/mortgage").monthlyOverpayment, 0);
 });
