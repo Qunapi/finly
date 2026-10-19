@@ -1,0 +1,97 @@
+const assert = require("node:assert/strict");
+const fs = require("node:fs");
+const Module = require("node:module");
+const path = require("node:path");
+const test = require("node:test");
+const ts = require("typescript");
+
+const filename = path.resolve(__dirname, "../app/lib/page-query.ts");
+const compiled = ts.transpileModule(fs.readFileSync(filename, "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.CommonJS, target: ts.ScriptTarget.ES2022 },
+});
+const queryModule = new Module(filename, module);
+queryModule.filename = filename;
+queryModule.paths = Module._nodeModulePaths(path.dirname(filename));
+queryModule._compile(compiled.outputText, filename);
+
+test("calculator query restores shareable inputs and preserves unrelated params", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery, defaultCalculatorState } = queryModule.exports;
+  const state = parseCalculatorQuery(
+    "?campaign=spring&tab=mortgage&amount=42000&youth=0&kup=1&ppk=0&loan=250000&rate=6.5&years=20",
+  );
+
+  assert.deepEqual(state, {
+    tab: "mortgage",
+    amount: 42000,
+    youthRelief: false,
+    copyrightKup: true,
+    ppk: false,
+    loan: 250000,
+    rate: 6.5,
+    years: 20,
+  });
+  assert.match(writeCalculatorQuery("?campaign=spring", state), /campaign=spring/);
+  assert.deepEqual(parseCalculatorQuery(`?${writeCalculatorQuery("", state)}`, "/mortgage/"), {
+    ...defaultCalculatorState,
+    tab: "mortgage",
+    loan: state.loan,
+    rate: state.rate,
+    years: state.years,
+  });
+});
+
+test("invalid calculator query values use defaults and valid ranges", () => {
+  const { defaultCalculatorState, parseCalculatorQuery } = queryModule.exports;
+  const state = parseCalculatorQuery("?tab=other&amount=NaN&youth=maybe&loan=9000000&rate=-1&years=0");
+
+  assert.equal(state.tab, defaultCalculatorState.tab);
+  assert.equal(state.amount, defaultCalculatorState.amount);
+  assert.equal(state.youthRelief, defaultCalculatorState.youthRelief);
+  assert.equal(state.loan, 5000000);
+  assert.equal(state.rate, 0);
+  assert.equal(state.years, 1);
+});
+
+test("tab paths override legacy query values and preserve deployment prefixes", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery, writeCalculatorPath, defaultCalculatorState } =
+    queryModule.exports;
+  assert.equal(parseCalculatorQuery("?tab=mortgage", "/salary/").tab, "salary");
+  assert.equal(parseCalculatorQuery("", "/finly/mortgage/").tab, "mortgage");
+  assert.equal(parseCalculatorQuery("", "/").tab, "salary");
+  assert.equal(writeCalculatorPath("/", "salary"), "/salary");
+  assert.equal(writeCalculatorPath("/finly/salary/", "mortgage"), "/finly/mortgage");
+  assert.equal(writeCalculatorPath("/finly/", "salary"), "/finly/salary");
+  const query = new URLSearchParams(writeCalculatorQuery("?tab=mortgage&campaign=test", defaultCalculatorState));
+  assert.equal(query.has("tab"), false);
+  assert.equal(query.get("campaign"), "test");
+});
+
+test("calculator paths stay slash-free when switching tabs", () => {
+  const { writeCalculatorPath, parseCalculatorQuery } = queryModule.exports;
+  assert.equal(writeCalculatorPath("/salary", "mortgage"), "/mortgage");
+  assert.equal(parseCalculatorQuery("", "/mortgage").tab, "mortgage");
+});
+
+test("query contains only active calculator settings and the default rate is 6.5", () => {
+  const { writeCalculatorQuery, parseCalculatorQuery, defaultCalculatorState } = queryModule.exports;
+  assert.equal(parseCalculatorQuery("", "/mortgage").rate, 6.5);
+  const original = "?amount=20000&youth=0&kup=0&ppk=0&loan=300000&rate=8&years=20&campaign=test";
+  assert.deepEqual(Object.fromEntries(new URLSearchParams(writeCalculatorQuery(original, defaultCalculatorState))), {
+    campaign: "test",
+    amount: "15000",
+    youth: "1",
+    kup: "1",
+    ppk: "1",
+  });
+  assert.deepEqual(
+    Object.fromEntries(
+      new URLSearchParams(writeCalculatorQuery(original, { ...defaultCalculatorState, tab: "mortgage" })),
+    ),
+    {
+      campaign: "test",
+      loan: "400000",
+      rate: "6.5",
+      years: "30",
+    },
+  );
+});
