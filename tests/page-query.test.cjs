@@ -27,6 +27,8 @@ test("calculator query restores shareable inputs and preserves unrelated params"
     copyrightKup: true,
     ppk: false,
     loan: 250000,
+    propertyPrice: 312500,
+    downPaymentPercent: 20,
     rate: 6.5,
     years: 20,
   });
@@ -35,6 +37,8 @@ test("calculator query restores shareable inputs and preserves unrelated params"
     ...defaultCalculatorState,
     tab: "mortgage",
     loan: state.loan,
+    propertyPrice: state.propertyPrice,
+    downPaymentPercent: state.downPaymentPercent,
     rate: state.rate,
     years: state.years,
   });
@@ -89,9 +93,26 @@ test("query contains only active calculator settings and the default rate is 6.5
     ),
     {
       campaign: "test",
-      loan: "400000",
+      price: "500000",
+      down: "20",
       rate: "6.5",
       years: "30",
     },
   );
+});
+
+test("mortgage price and down payment determine the loan and survive sharing", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery } = queryModule.exports;
+  const defaults = parseCalculatorQuery("", "/mortgage");
+  assert.equal(defaults.downPaymentPercent, 20);
+  assert.equal(defaults.loan, 400000);
+  const state = parseCalculatorQuery("?price=750000&down=10&campaign=test", "/mortgage");
+  assert.equal(state.loan, 675000);
+  assert.deepEqual(parseCalculatorQuery(writeCalculatorQuery("?campaign=test", state), "/mortgage"), state);
+  assert.equal(parseCalculatorQuery("?price=500000&down=100").loan, 0);
+  assert.equal(parseCalculatorQuery("?price=500000&down=-10").loan, 500000);
+  assert.equal(parseCalculatorQuery("?price=500000&down=NaN").loan, 400000);
+  assert.equal(parseCalculatorQuery("?price=0&down=20").loan, 0);
+  assert.equal(parseCalculatorQuery("?price=500000&down=150").loan, 0);
+  assert.equal(parseCalculatorQuery("?price=500000&down=20&loan=1").loan, 400000);
 });

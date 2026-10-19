@@ -22,7 +22,10 @@ export default function Home() {
   const [ppk, setPpk] = useState(true);
   const [copyrightKup, setCopyrightKup] = useState(true);
   const [queryLoaded, setQueryLoaded] = useState(false);
-  const [loan, setLoan] = useState(400000);
+  const [propertyPrice, setPropertyPrice] = useState(defaultCalculatorState.propertyPrice);
+  const [downPaymentPercent, setDownPaymentPercent] = useState(defaultCalculatorState.downPaymentPercent);
+  const downPayment = Math.round(propertyPrice * downPaymentPercent) / 100;
+  const loan = Math.round((propertyPrice - downPayment) * 100) / 100;
   const [rate, setRate] = useState(defaultCalculatorState.rate);
   const [years, setYears] = useState(30);
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null);
@@ -55,7 +58,8 @@ export default function Home() {
     setYouthRelief(state.youthRelief);
     setCopyrightKup(state.copyrightKup);
     setPpk(state.ppk);
-    setLoan(state.loan);
+    setPropertyPrice(state.propertyPrice);
+    setDownPaymentPercent(state.downPaymentPercent);
     setRate(state.rate);
     setYears(state.years);
     setQueryLoaded(true);
@@ -70,6 +74,8 @@ export default function Home() {
       copyrightKup,
       ppk,
       loan,
+      propertyPrice,
+      downPaymentPercent,
       rate,
       years,
     });
@@ -78,7 +84,7 @@ export default function Home() {
       "",
       `${writeCalculatorPath(window.location.pathname, tab)}?${query}${window.location.hash}`,
     );
-  }, [queryLoaded, tab, amount, youthRelief, copyrightKup, ppk, loan, rate, years]);
+  }, [queryLoaded, tab, amount, youthRelief, copyrightKup, ppk, loan, propertyPrice, downPaymentPercent, rate, years]);
 
   return (
     <main className="shell">
@@ -232,12 +238,25 @@ export default function Home() {
           <section className="calculator mortgage-calculator" aria-label="Kalkulator kredytu hipotecznego">
             <div className="input-panel">
               <MoneyInput
-                id="loan"
-                label="Kwota kredytu"
-                value={loan}
-                onChange={(value) => setLoan(Math.min(5000000, value))}
-                max={5000000}
+                id="property-price"
+                label="Cena mieszkania"
+                value={propertyPrice}
+                onChange={setPropertyPrice}
+                max={6250000}
               />
+              <MoneyInput
+                id="down-payment"
+                label="Wkład własny"
+                value={downPaymentPercent}
+                onChange={setDownPaymentPercent}
+                max={100}
+                step={1}
+                suffix="%"
+              />
+              <div aria-live="polite">
+                <Breakdown label="Wkład własny" value={downPayment} />
+                <Breakdown label="Kwota kredytu" value={loan} />
+              </div>
               <MoneyInput
                 id="rate"
                 label="Oprocentowanie roczne"
