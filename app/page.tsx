@@ -390,6 +390,10 @@ export default function Home() {
           </section>
           <section className="payment-schedule" aria-label="Harmonogram spłaty">
             <h2>Harmonogram spłaty</h2>
+            <p className="lede" aria-live="polite">
+              Łączny okres spłaty: <strong>{mortgage.months} mies.</strong> ({Math.floor(mortgage.months / 12)} lat i{" "}
+              {mortgage.months % 12} mies.)
+            </p>
             <div
               className="table-scroll"
               tabIndex={0}
