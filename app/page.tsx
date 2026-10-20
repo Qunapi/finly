@@ -379,7 +379,7 @@ export default function Home() {
                   max={6250000}
                 />
                 <div className="quick-amounts" aria-label={t("Szybki wybór nadpłaty")}>
-                  {[0, 5000, 10000, 15000, 20000, 25000].map((value) => (
+                  {[0, 5000, 10000, 15000, 20000, 25000, 30000].map((value) => (
                     <button
                       key={value}
                       type="button"
