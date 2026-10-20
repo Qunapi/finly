@@ -506,3 +506,29 @@ footer {
     display: none;
   }
 }
+.overpayment-toggle {
+  margin-top: 24px;
+}
+.overpayment-fields {
+  border: 0;
+  padding: 0;
+  margin: 16px 0 0;
+  min-width: 0;
+}
+.overpayment-fields:disabled {
+  opacity: 0.5;
+}
+.overpayment-fields:disabled button {
+  cursor: default;
+}
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

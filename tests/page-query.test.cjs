@@ -32,6 +32,7 @@ test("calculator query restores shareable inputs and preserves unrelated params"
     rate: 6.5,
     years: 20,
     monthlyOverpayment: 15000,
+    overpaymentEnabled: true,
     overpaymentMode: "payment",
   });
   assert.match(writeCalculatorQuery("?campaign=spring", state), /campaign=spring/);
@@ -100,6 +101,7 @@ test("query contains only active calculator settings and the default rate is 6.5
       rate: "6.5",
       years: "30",
       overpay: "15000",
+      overpayOn: "1",
       mode: "payment",
     },
   );
@@ -136,4 +138,17 @@ test("default monthly overpayment is 15000 and an explicit zero is preserved", (
   const { parseCalculatorQuery } = queryModule.exports;
   assert.equal(parseCalculatorQuery("", "/mortgage").monthlyOverpayment, 15000);
   assert.equal(parseCalculatorQuery("?overpay=0", "/mortgage").monthlyOverpayment, 0);
+});
+
+test("overpayment checkbox defaults on and preserves the amount while disabled in shared links", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery } = queryModule.exports;
+  assert.equal(parseCalculatorQuery("", "/mortgage").overpaymentEnabled, true);
+  assert.equal(parseCalculatorQuery("?overpay=5000", "/mortgage").overpaymentEnabled, true);
+  const state = parseCalculatorQuery("?overpay=25000&overpayOn=0", "/mortgage");
+  assert.equal(state.overpaymentEnabled, false);
+  assert.equal(state.monthlyOverpayment, 25000);
+  assert.deepEqual(parseCalculatorQuery(writeCalculatorQuery("?lang=ru", state), "/mortgage"), state);
+  const salary = writeCalculatorQuery("?overpayOn=0&lang=ru", { ...state, tab: "salary" });
+  assert.equal(new URLSearchParams(salary).has("overpayOn"), false);
+  assert.equal(new URLSearchParams(salary).get("lang"), "ru");
 });

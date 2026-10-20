@@ -12,6 +12,7 @@ export type CalculatorState = {
   rate: number;
   years: number;
   monthlyOverpayment: number;
+  overpaymentEnabled: boolean;
   overpaymentMode: OverpaymentMode;
 };
 
@@ -27,6 +28,7 @@ export const defaultCalculatorState: CalculatorState = {
   rate: 6.5,
   years: 30,
   monthlyOverpayment: 15000,
+  overpaymentEnabled: true,
   overpaymentMode: "payment",
 };
 
@@ -61,6 +63,7 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
     loan: Math.round(propertyPrice * (1 - downPaymentPercent / 100) * 100) / 100,
     rate: number("rate", defaultCalculatorState.rate, 0, 30),
     years: number("years", defaultCalculatorState.years, 1, 40),
+    overpaymentEnabled: boolean("overpayOn", defaultCalculatorState.overpaymentEnabled),
     monthlyOverpayment: number("overpay", defaultCalculatorState.monthlyOverpayment, 0, 6250000),
     overpaymentMode: params.get("mode") === "duration" ? "duration" : "payment",
   };
@@ -69,7 +72,20 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
 export function writeCalculatorQuery(search: string, state: CalculatorState): string {
   const params = new URLSearchParams(search);
   params.delete("tab");
-  for (const key of ["amount", "youth", "kup", "ppk", "loan", "price", "down", "rate", "years", "overpay", "mode"])
+  for (const key of [
+    "amount",
+    "youth",
+    "kup",
+    "ppk",
+    "loan",
+    "price",
+    "down",
+    "rate",
+    "years",
+    "overpay",
+    "overpayOn",
+    "mode",
+  ])
     params.delete(key);
   if (state.tab === "salary") {
     params.set("amount", String(state.amount));
@@ -82,6 +98,7 @@ export function writeCalculatorQuery(search: string, state: CalculatorState): st
     params.set("rate", String(state.rate));
     params.set("years", String(state.years));
     params.set("overpay", String(state.monthlyOverpayment));
+    params.set("overpayOn", state.overpaymentEnabled ? "1" : "0");
     params.set("mode", state.overpaymentMode);
   }
   return params.toString();

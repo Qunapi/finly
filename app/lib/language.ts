@@ -13,6 +13,8 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Uwzględnij nadpłaty": { en: "Enable overpayments", ru: "Учитывать досрочные платежи" },
+  "Szybki wybór nadpłaty": { en: "Overpayment presets", ru: "Быстрый выбор досрочного платежа" },
   Język: {
     en: "Language",
     ru: "Язык",

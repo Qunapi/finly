@@ -47,11 +47,12 @@ export default function Home() {
   const [rate, setRate] = useState(defaultCalculatorState.rate);
   const [years, setYears] = useState(30);
   const [monthlyOverpayment, setMonthlyOverpayment] = useState(defaultCalculatorState.monthlyOverpayment);
+  const [overpaymentEnabled, setOverpaymentEnabled] = useState(defaultCalculatorState.overpaymentEnabled);
   const [overpaymentMode, setOverpaymentMode] = useState<OverpaymentMode>("payment");
   const [exchangeRates, setExchangeRates] = useState<ExchangeRates | null>(null);
   const [ratesUnavailable, setRatesUnavailable] = useState(false);
   const result = calculateSalary(amount, youthRelief, copyrightKup, ppk);
-  const mortgage = calculateMortgage(loan, rate, years, monthlyOverpayment, overpaymentMode);
+  const mortgage = calculateMortgage(loan, rate, years, overpaymentEnabled ? monthlyOverpayment : 0, overpaymentMode);
   const baselineMortgage = calculateMortgage(loan, rate, years);
   const b2bEquivalent = findEquivalentAmount(result.uopNet, "b2b", youthRelief, copyrightKup, ppk);
   const uopEquivalent = findEquivalentAmount(result.b2bNet, "uop", youthRelief, copyrightKup, ppk);
@@ -84,6 +85,7 @@ export default function Home() {
     setRate(state.rate);
     setYears(state.years);
     setMonthlyOverpayment(state.monthlyOverpayment);
+    setOverpaymentEnabled(state.overpaymentEnabled);
     setOverpaymentMode(state.overpaymentMode);
     setQueryLoaded(true);
   }, []);
@@ -102,6 +104,7 @@ export default function Home() {
       rate,
       years,
       monthlyOverpayment,
+      overpaymentEnabled,
       overpaymentMode,
     });
     window.history.replaceState(
@@ -122,6 +125,7 @@ export default function Home() {
     rate,
     years,
     monthlyOverpayment,
+    overpaymentEnabled,
     overpaymentMode,
   ]);
 
@@ -356,33 +360,57 @@ export default function Home() {
                 <NumberInput id="years" value={years} onChange={setYears} min={1} max={40} />
                 <span>{t("lat")}</span>
               </div>
-              <MoneyInput
-                id="overpayment"
-                label={t("Nadpłata miesięczna")}
-                value={monthlyOverpayment}
-                onChange={setMonthlyOverpayment}
-                max={6250000}
-              />
-              <fieldset className="overpayment-options">
-                <legend>{t("Cel nadpłaty")}</legend>
-                <label className="check-option">
-                  <input
-                    type="radio"
-                    name="overpayment-mode"
-                    checked={overpaymentMode === "payment"}
-                    onChange={() => setOverpaymentMode("payment")}
-                  />{" "}
-                  {t("Zmniejszenie raty")}
-                </label>
-                <label className="check-option">
-                  <input
-                    type="radio"
-                    name="overpayment-mode"
-                    checked={overpaymentMode === "duration"}
-                    onChange={() => setOverpaymentMode("duration")}
-                  />{" "}
-                  {t("Skrócenie okresu spłaty")}
-                </label>
+              <label className="check-option overpayment-toggle">
+                <input
+                  id="overpayment-enabled"
+                  type="checkbox"
+                  checked={overpaymentEnabled}
+                  onChange={(event) => setOverpaymentEnabled(event.target.checked)}
+                />
+                {t("Uwzględnij nadpłaty")}
+              </label>
+              <fieldset className="overpayment-fields" disabled={!overpaymentEnabled}>
+                <legend className="sr-only">{t("Nadpłata miesięczna")}</legend>
+                <MoneyInput
+                  id="overpayment"
+                  label={t("Nadpłata miesięczna")}
+                  value={monthlyOverpayment}
+                  onChange={setMonthlyOverpayment}
+                  max={6250000}
+                />
+                <div className="quick-amounts" aria-label={t("Szybki wybór nadpłaty")}>
+                  {[0, 5000, 10000, 15000, 20000, 25000].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      aria-pressed={monthlyOverpayment === value}
+                      onClick={() => setMonthlyOverpayment(value)}
+                    >
+                      {value === 0 ? "0" : `${value / 1000}k`}
+                    </button>
+                  ))}
+                </div>
+                <fieldset className="overpayment-options">
+                  <legend>{t("Cel nadpłaty")}</legend>
+                  <label className="check-option">
+                    <input
+                      type="radio"
+                      name="overpayment-mode"
+                      checked={overpaymentMode === "payment"}
+                      onChange={() => setOverpaymentMode("payment")}
+                    />{" "}
+                    {t("Zmniejszenie raty")}
+                  </label>
+                  <label className="check-option">
+                    <input
+                      type="radio"
+                      name="overpayment-mode"
+                      checked={overpaymentMode === "duration"}
+                      onChange={() => setOverpaymentMode("duration")}
+                    />{" "}
+                    {t("Skrócenie okresu spłaty")}
+                  </label>
+                </fieldset>
               </fieldset>
             </div>
             <article className="result-card mortgage-result">
