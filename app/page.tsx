@@ -242,14 +242,14 @@ export default function Home() {
                 <p className="takehome">{exactMoney.format(result.b2bNet)}</p>
                 <p className="takehome-label">na rękę / miesiąc</p>
                 <CurrencyEquivalent amount={result.b2bNet} rates={exchangeRates} unavailable={ratesUnavailable} />
+                <p className="equivalent">
+                  Pensja na UoP z takim samym netto: <strong>{exactMoney.format(uopEquivalent)} brutto / mies.</strong>
+                </p>
+                <CurrencyEquivalent amount={uopEquivalent} rates={exchangeRates} unavailable={ratesUnavailable} />
                 <div className="divider" />
                 <Breakdown label="ZUS społeczny · bez chorobowego" value={result.b2bSocial} />
                 <Breakdown label="Składka zdrowotna" value={result.b2bHealth} />
                 <Breakdown label="Ryczałt 12%" value={result.b2bTax} />
-                <p className="equivalent">
-                  Taka sama kwota netto na UoP: <strong>{exactMoney.format(uopEquivalent)} brutto / mies.</strong>
-                </p>
-                <CurrencyEquivalent amount={uopEquivalent} rates={exchangeRates} unavailable={ratesUnavailable} />
               </article>
             </div>
           </section>
