@@ -373,7 +373,7 @@ export default function Home() {
                 <legend className="sr-only">{t("Nadpłata miesięczna")}</legend>
                 <MoneyInput
                   id="overpayment"
-                  label={t("Nadpłata miesięczna")}
+                  label={t("Nadpłata w pierwszym miesiącu")}
                   value={monthlyOverpayment}
                   onChange={setMonthlyOverpayment}
                   max={6250000}
@@ -416,6 +416,12 @@ export default function Home() {
             <article className="result-card mortgage-result">
               <p className="eyebrow">{t("RATA MIESIĘCZNA")}</p>
               <p className="takehome mortgage-payment">{exactMoney.format(mortgage.payment)}</p>
+              <Breakdown label={t("Stała płatność miesięczna")} value={mortgage.monthlyBudget} />
+              <p className="mortgage-footnote">
+                {t(
+                  "Stała suma raty i nadpłaty. Gdy rata maleje, nadpłata rośnie. Obie strategie dają ten sam termin spłaty i odsetki; ostatnia płatność może być niższa.",
+                )}
+              </p>
               <div
                 className="mortgage-meter"
                 aria-label={`${t("Kapitał")} ${Math.round((loan / (mortgage.total || 1)) * 100)}%, ${t("odsetki")} ${Math.round((mortgage.interest / (mortgage.total || 1)) * 100)}%`}

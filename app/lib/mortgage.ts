@@ -18,15 +18,21 @@ export function calculateMortgage(
   const cents = (value: number) => Math.round(value * 100);
   let balance = cents(principal);
   const extra = Math.max(0, cents(monthlyOverpayment));
+  const monthlyBudget = balance > 0 ? cents(payment) + extra : 0;
   const schedule = [];
   let totalCents = 0;
   let interestCents = 0;
   for (let month = 1; month <= months && balance > 0; month++) {
     const interest = Math.round(balance * monthlyRate);
     const regularPayment =
-      mode === "payment" ? cents(monthlyPayment(balance / 100, monthlyRate, months - month + 1)) : cents(payment);
+      mode === "payment" && extra > 0
+        ? cents(monthlyPayment(balance / 100, monthlyRate, months - month + 1))
+        : cents(payment);
     const installment = month === months ? balance + interest : Math.min(balance + interest, regularPayment);
-    const overpayment = Math.min(extra, Math.max(0, balance + interest - installment));
+    // Reinvest every reduction of the required installment into the overpayment.
+    // Both strategies therefore use the same total monthly budget until the final payment.
+    const overpayment =
+      extra > 0 ? Math.min(Math.max(0, monthlyBudget - installment), Math.max(0, balance + interest - installment)) : 0;
     const paidPrincipal = installment - interest + overpayment;
     balance = Math.max(0, balance - paidPrincipal);
     totalCents += installment + overpayment;
@@ -41,5 +47,12 @@ export function calculateMortgage(
       balance: balance / 100,
     });
   }
-  return { payment, total: totalCents / 100, interest: interestCents / 100, months: schedule.length, schedule };
+  return {
+    payment,
+    monthlyBudget: monthlyBudget / 100,
+    total: totalCents / 100,
+    interest: interestCents / 100,
+    months: schedule.length,
+    schedule,
+  };
 }

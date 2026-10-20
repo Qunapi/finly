@@ -26,21 +26,24 @@ test("schedule repays principal and totals agree to the grosz", () => {
     assert.ok(result.schedule.every((row) => row.balance >= 0 && row.overpayment >= 0));
   }
 });
-test("overpayment reduces installments by default or shortens duration", () => {
+test("both strategies keep the same monthly total while splitting installment and overpayment differently", () => {
   const { calculateMortgage } = queryModule.exports;
   const baseline = calculateMortgage(400000, 6.5, 30);
   const payment = calculateMortgage(400000, 6.5, 30, 500);
   const duration = calculateMortgage(400000, 6.5, 30, 500, "duration");
   assert.ok(Math.abs(baseline.payment - 2528.27) < 0.01);
   assert.equal(baseline.months, 360);
-  // A fixed extra payment may clear the last installments early even as the required payment falls.
-  assert.ok(payment.months <= 360);
-  assert.ok(duration.months < payment.months);
+  assert.equal(payment.months, duration.months);
+  assert.equal(payment.total, duration.total);
+  assert.equal(payment.interest, duration.interest);
+  assert.equal(payment.monthlyBudget, 3028.27);
+  assert.equal(payment.monthlyBudget, duration.monthlyBudget);
+  assert.ok(payment.schedule[1].overpayment > payment.schedule[0].overpayment);
   assert.ok(payment.schedule[1].payment < payment.schedule[0].payment);
   assert.ok(duration.months < 360);
   assert.equal(duration.schedule[0].payment, duration.schedule[1].payment);
   assert.ok(payment.interest < baseline.interest);
-  assert.ok(duration.interest < payment.interest);
+  assert.equal(duration.interest, payment.interest);
 });
 test("zero rate, zero loan and final overpayment are handled", () => {
   const { calculateMortgage } = queryModule.exports;
@@ -53,4 +56,33 @@ test("zero rate, zero loan and final overpayment are handled", () => {
   assert.equal(paid.months, 1);
   assert.equal(paid.total, 1000);
   assert.equal(paid.schedule[0].overpayment, 916.67);
+});
+
+test("fixed budgets produce identical balances and costs across rates, terms and payoff edges", () => {
+  const { calculateMortgage } = queryModule.exports;
+  for (const [principal, rate, years, extra] of [
+    [1280000, 6.5, 30, 15000],
+    [1200, 0, 1, 100],
+    [400000, 6.5, 30, 0],
+    [1000, 0, 1, 100000],
+    [0, 6.5, 30, 15000],
+    [500000, 12, 20, 0.01],
+  ]) {
+    const reduce = calculateMortgage(principal, rate, years, extra, "payment");
+    const shorten = calculateMortgage(principal, rate, years, extra, "duration");
+    assert.equal(reduce.months, shorten.months);
+    assert.equal(reduce.total, shorten.total);
+    assert.equal(reduce.interest, shorten.interest);
+    for (let i = 0; i < reduce.schedule.length; i++) {
+      const row = reduce.schedule[i],
+        other = shorten.schedule[i];
+      assert.equal(row.total, other.total);
+      assert.equal(row.balance, other.balance);
+      assert.equal(row.interest, other.interest);
+      if (extra > 0) {
+        if (i < reduce.schedule.length - 1) assert.equal(row.total, reduce.monthlyBudget);
+        else assert.ok(row.total <= reduce.monthlyBudget);
+      } else assert.equal(row.overpayment, 0);
+    }
+  }
 });

@@ -13,6 +13,13 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Nadpłata w pierwszym miesiącu": { en: "First-month overpayment", ru: "Досрочный платёж в первый месяц" },
+  "Stała płatność miesięczna": { en: "Fixed total monthly payment", ru: "Фиксированная общая сумма в месяц" },
+  "Stała suma raty i nadpłaty. Gdy rata maleje, nadpłata rośnie. Obie strategie dają ten sam termin spłaty i odsetki; ostatnia płatność może być niższa.":
+    {
+      en: "The installment and overpayment add up to a fixed monthly total. As the installment falls, the overpayment grows. Both strategies give the same payoff date and interest; the final payment may be smaller.",
+      ru: "Сумма платежа и досрочного погашения фиксирована. Когда платёж уменьшается, досрочное погашение растёт. Обе стратегии дают одинаковый срок и проценты; последний платёж может быть меньше.",
+    },
   "Uwzględnij nadpłaty": { en: "Enable overpayments", ru: "Учитывать досрочные платежи" },
   "Szybki wybór nadpłaty": { en: "Overpayment presets", ru: "Быстрый выбор досрочного платежа" },
   Język: {
