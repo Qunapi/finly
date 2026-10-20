@@ -1,9 +1,11 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import { useLanguage } from "./language-provider";
 
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 
 export default function Pwa({ base }: { base: string }) {
+  const { t } = useLanguage();
   const registration = useRef<ServiceWorkerRegistration | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [install, setInstall] = useState<InstallPrompt | null>(null);
@@ -73,7 +75,7 @@ export default function Pwa({ base }: { base: string }) {
   }, [base]);
 
   return (
-    <aside className="pwa-controls" aria-label="Aplikacja Finly">
+    <aside className="pwa-controls" aria-label={t("Aplikacja Finly")}>
       {!standalone && (
         <button
           type="button"
@@ -88,7 +90,7 @@ export default function Pwa({ base }: { base: string }) {
               );
           }}
         >
-          Zainstaluj aplikację
+          {t("Zainstaluj aplikację")}
         </button>
       )}
       <button
@@ -107,14 +109,14 @@ export default function Pwa({ base }: { base: string }) {
           }
         }}
       >
-        Sprawdź aktualizacje
+        {t("Sprawdź aktualizacje")}
       </button>
-      {message && <p role="status">{message}</p>}
+      {message && <p role="status">{t(message)}</p>}
       {waiting && (
         <div className="pwa-update" role="status">
-          <span>Nowa wersja Finly jest gotowa.</span>
+          <span>{t("Nowa wersja Finly jest gotowa.")}</span>
           <button type="button" onClick={() => waiting.postMessage({ type: "SKIP_WAITING" })}>
-            Aktualizuj teraz
+            {t("Aktualizuj teraz")}
           </button>
         </div>
       )}

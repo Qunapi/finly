@@ -484,3 +484,25 @@ footer {
   z-index: 10;
   box-shadow: 0 4px 24px #17223833;
 }
+.header-settings {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.header-settings select {
+  font: inherit;
+  max-width: 120px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  background: white;
+}
+@media (max-width: 560px) {
+  .header-settings {
+    gap: 8px;
+  }
+  .header-settings .year {
+    display: none;
+  }
+}

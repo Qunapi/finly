@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLanguage } from "./components/language-provider";
 import { numberFormat, parseNumberInput } from "./lib/number-format";
 import { fetchExchangeRates, type ExchangeRates } from "./lib/exchange-rates";
 import { calculateSalary, findEquivalentAmount } from "./lib/salary";
@@ -32,6 +33,7 @@ const euros = new Intl.NumberFormat("pl-PL", {
 });
 const quickAmounts = [20000, 25000, 30000, 40000, 50000, 60000];
 export default function Home() {
+  const { t, language, setLanguage } = useLanguage();
   const [tab, setTab] = useState<"salary" | "mortgage">("salary");
   const [amount, setAmount] = useState(15000);
   const [youthRelief, setYouthRelief] = useState(true);
@@ -129,37 +131,54 @@ export default function Home() {
         <a className="brand" href="#">
           finly<span>.</span>
         </a>
-        <span className="year">POLSKA · 2026</span>
+        <div className="header-settings">
+          <span className="year">{t("POLSKA · 2026")}</span>
+          <select
+            aria-label={t("Język")}
+            value={language}
+            onChange={(event) => setLanguage(event.target.value as "pl" | "en" | "ru")}
+          >
+            <option value="pl" lang="pl">
+              Polski
+            </option>
+            <option value="en" lang="en">
+              English
+            </option>
+            <option value="ru" lang="ru">
+              Русский
+            </option>
+          </select>
+        </div>
       </header>
-      <nav className="tabs" aria-label="Kalkulatory">
+      <nav className="tabs" aria-label={t("Kalkulatory")}>
         <button className={tab === "salary" ? "active" : ""} onClick={() => setTab("salary")}>
-          Wynagrodzenie
+          {t("Wynagrodzenie")}
         </button>
         <button className={tab === "mortgage" ? "active" : ""} onClick={() => setTab("mortgage")}>
-          Kredyt hipoteczny
+          {t("Kredyt hipoteczny")}
         </button>
       </nav>
       {tab === "salary" ? (
         <>
           <section className="intro">
-            <p className="eyebrow">KALKULATOR WYNAGRODZEŃ</p>
+            <p className="eyebrow">{t("KALKULATOR WYNAGRODZEŃ")}</p>
             <h1>
-              Ile zostaje
+              {t("Ile zostaje")}
               <br />
-              na Twoim koncie?
+              {t("na Twoim koncie?")}
             </h1>
-            <p className="lede">Porównaj umowę o pracę z kontraktem B2B na ryczałcie 12%.</p>
+            <p className="lede">{t("Porównaj umowę o pracę z kontraktem B2B na ryczałcie 12%.")}</p>
           </section>
 
-          <section className="calculator" aria-label="Porównanie wynagrodzeń">
+          <section className="calculator" aria-label={t("Porównanie wynagrodzeń")}>
             <div className="input-panel">
-              <label htmlFor="amount">Miesięczne wynagrodzenie brutto / faktura netto</label>
+              <label htmlFor="amount">{t("Miesięczne wynagrodzenie brutto / faktura netto")}</label>
               <div className="amount-input">
                 <NumberInput id="amount" value={amount} onChange={setAmount} max={Number.MAX_SAFE_INTEGER} />
                 <span>PLN</span>
               </div>
               <input
-                aria-label="Wynagrodzenie"
+                aria-label={t("Wynagrodzenie")}
                 className="range"
                 type="range"
                 min="3000"
@@ -172,7 +191,7 @@ export default function Home() {
                 <span>3 000 zł</span>
                 <span>60 000 zł</span>
               </div>
-              <div className="quick-amounts" aria-label="Szybki wybór wynagrodzenia">
+              <div className="quick-amounts" aria-label={t("Szybki wybór wynagrodzenia")}>
                 {quickAmounts.map((preset) => (
                   <button key={preset} type="button" aria-pressed={amount === preset} onClick={() => setAmount(preset)}>
                     {preset / 1000}k
@@ -186,7 +205,7 @@ export default function Home() {
                     checked={youthRelief}
                     onChange={(event) => setYouthRelief(event.target.checked)}
                   />{" "}
-                  Ulga dla młodych (do 26 lat)
+                  {t("Ulga dla młodych (do 26 lat)")}
                 </label>
                 <label className="check-option">
                   <input
@@ -194,10 +213,10 @@ export default function Home() {
                     checked={copyrightKup}
                     onChange={(event) => setCopyrightKup(event.target.checked)}
                   />{" "}
-                  50% KUP · prawa autorskie
+                  {t("50% KUP · prawa autorskie")}
                 </label>
                 <small className="kup-note">
-                  Dla kwalifikującego się honorarium; limit 120 000 zł rocznie wspólny z ulgą dla młodych.
+                  {t("Dla kwalifikującego się honorarium; limit 120 000 zł rocznie wspólny z ulgą dla młodych.")}
                 </small>
                 <label className="check-option">
                   <input type="checkbox" checked={ppk} onChange={(event) => setPpk(event.target.checked)} /> PPK · 2%
@@ -206,9 +225,9 @@ export default function Home() {
               <div className="comparison-note">
                 <span className="sparkle">✳</span>
                 <span>
-                  Przy tej kwocie więcej zostaje na <strong>{better}</strong>
+                  {t("Przy tej kwocie więcej zostaje na")} <strong>{better}</strong>
                   <br />
-                  różnica to <strong>{exactMoney.format(difference)}</strong> miesięcznie.
+                  {t("różnica to")} <strong>{exactMoney.format(difference)}</strong> {t("miesięcznie.")}
                 </span>
               </div>
             </div>
@@ -217,39 +236,45 @@ export default function Home() {
               <article className="result-card uop">
                 <div className="card-heading">
                   <span className="dot" />
-                  <span>Umowa o pracę</span>
+                  <span>{t("Umowa o pracę")}</span>
                   <span className="tag">UoP</span>
                 </div>
                 <p className="takehome">{exactMoney.format(result.uopNet)}</p>
-                <p className="takehome-label">na rękę / miesiąc</p>
+                <p className="takehome-label">{t("na rękę / miesiąc")}</p>
                 <CurrencyEquivalent amount={result.uopNet} rates={exchangeRates} unavailable={ratesUnavailable} />
                 <div className="divider" />
-                <Breakdown label="Składki społeczne" value={result.employeeSocial} />
-                <Breakdown label="Składka zdrowotna" value={result.health} />
-                {ppk && <Breakdown label="PPK pracownika · 2%" value={result.employeePpk} />}
-                <Breakdown label="Zaliczka na PIT" value={result.annualTax} />
+                <Breakdown label={t("Składki społeczne")} value={result.employeeSocial} />
+                <Breakdown label={t("Składka zdrowotna")} value={result.health} />
+                {ppk && <Breakdown label={t("PPK pracownika · 2%")} value={result.employeePpk} />}
+                <Breakdown label={t("Zaliczka na PIT")} value={result.annualTax} />
                 <p className="equivalent">
-                  Taka sama kwota netto na B2B: <strong>{exactMoney.format(b2bEquivalent)} / mies.</strong>
+                  {t("Taka sama kwota netto na B2B:")}{" "}
+                  <strong>
+                    {exactMoney.format(b2bEquivalent)} {t("/ mies.")}
+                  </strong>
                 </p>
                 <CurrencyEquivalent amount={b2bEquivalent} rates={exchangeRates} unavailable={ratesUnavailable} />
               </article>
               <article className="result-card b2b">
                 <div className="card-heading">
                   <span className="dot" />
-                  <span>B2B · ryczałt 12%</span>
+                  <span>{t("B2B · ryczałt 12%")}</span>
                   <span className="tag">JDG</span>
                 </div>
                 <p className="takehome">{exactMoney.format(result.b2bNet)}</p>
-                <p className="takehome-label">na rękę / miesiąc</p>
+                <p className="takehome-label">{t("na rękę / miesiąc")}</p>
                 <CurrencyEquivalent amount={result.b2bNet} rates={exchangeRates} unavailable={ratesUnavailable} />
                 <p className="equivalent">
-                  Pensja na UoP z takim samym netto: <strong>{exactMoney.format(uopEquivalent)} brutto / mies.</strong>
+                  {t("Pensja na UoP z takim samym netto:")}{" "}
+                  <strong>
+                    {exactMoney.format(uopEquivalent)} {t("brutto / mies.")}
+                  </strong>
                 </p>
                 <CurrencyEquivalent amount={uopEquivalent} rates={exchangeRates} unavailable={ratesUnavailable} />
                 <div className="divider" />
-                <Breakdown label="ZUS społeczny · bez chorobowego" value={result.b2bSocial} />
-                <Breakdown label="Składka zdrowotna" value={result.b2bHealth} />
-                <Breakdown label="Ryczałt 12%" value={result.b2bTax} />
+                <Breakdown label={t("ZUS społeczny · bez chorobowego")} value={result.b2bSocial} />
+                <Breakdown label={t("Składka zdrowotna")} value={result.b2bHealth} />
+                <Breakdown label={t("Ryczałt 12%")} value={result.b2bTax} />
               </article>
             </div>
           </section>
@@ -257,24 +282,24 @@ export default function Home() {
       ) : (
         <>
           <section className="intro">
-            <p className="eyebrow">KALKULATOR KREDYTU</p>
+            <p className="eyebrow">{t("KALKULATOR KREDYTU")}</p>
             <h1>
-              Sprawdź ratę
+              {t("Sprawdź ratę")}
               <br />
-              swojego kredytu.
+              {t("swojego kredytu.")}
             </h1>
-            <p className="lede">Zobacz miesięczną ratę i całkowity koszt kredytu.</p>
+            <p className="lede">{t("Zobacz miesięczną ratę i całkowity koszt kredytu.")}</p>
           </section>
-          <section className="calculator mortgage-calculator" aria-label="Kalkulator kredytu hipotecznego">
+          <section className="calculator mortgage-calculator" aria-label={t("Kalkulator kredytu hipotecznego")}>
             <div className="input-panel">
               <MoneyInput
                 id="property-price"
-                label="Cena mieszkania"
+                label={t("Cena mieszkania")}
                 value={propertyPrice}
                 onChange={setPropertyPrice}
                 max={6250000}
               />
-              <div className="quick-amounts" aria-label="Szybki wybór ceny mieszkania">
+              <div className="quick-amounts" aria-label={t("Szybki wybór ceny mieszkania")}>
                 {[1200000, 1000000, 800000, 1500000, 1600000, 1700000, 2000000].map((price) => (
                   <button
                     key={price}
@@ -288,13 +313,13 @@ export default function Home() {
               </div>
               <MoneyInput
                 id="down-payment"
-                label="Wkład własny"
+                label={t("Wkład własny")}
                 value={Number(downPaymentPercent.toFixed(6))}
                 onChange={setDownPaymentPercent}
                 max={100}
                 suffix="%"
               />
-              <div className="quick-amounts" aria-label="Szybki wybór wkładu własnego">
+              <div className="quick-amounts" aria-label={t("Szybki wybór wkładu własnego")}>
                 {[10, 20, 30, 40].map((percent) => (
                   <button
                     key={percent}
@@ -308,38 +333,38 @@ export default function Home() {
               </div>
               <MoneyInput
                 id="down-payment-amount"
-                label="Wkład własny w złotych"
+                label={t("Wkład własny w złotych")}
                 value={downPayment}
                 onChange={(value) => setDownPaymentPercent(propertyPrice ? (value / propertyPrice) * 100 : 0)}
                 max={propertyPrice}
               />
               <div aria-live="polite">
-                <Breakdown label="Kwota kredytu" value={loan} />
+                <Breakdown label={t("Kwota kredytu")} value={loan} />
               </div>
               <MoneyInput
                 id="rate"
-                label="Oprocentowanie roczne"
+                label={t("Oprocentowanie roczne")}
                 value={rate}
                 onChange={(value) => setRate(Math.min(30, value))}
                 max={30}
                 suffix="%"
               />
               <label className="term-label" htmlFor="years">
-                Okres spłaty
+                {t("Okres spłaty")}
               </label>
               <div className="amount-input term-input">
                 <NumberInput id="years" value={years} onChange={setYears} min={1} max={40} />
-                <span>lat</span>
+                <span>{t("lat")}</span>
               </div>
               <MoneyInput
                 id="overpayment"
-                label="Nadpłata miesięczna"
+                label={t("Nadpłata miesięczna")}
                 value={monthlyOverpayment}
                 onChange={setMonthlyOverpayment}
                 max={6250000}
               />
               <fieldset className="overpayment-options">
-                <legend>Cel nadpłaty</legend>
+                <legend>{t("Cel nadpłaty")}</legend>
                 <label className="check-option">
                   <input
                     type="radio"
@@ -347,7 +372,7 @@ export default function Home() {
                     checked={overpaymentMode === "payment"}
                     onChange={() => setOverpaymentMode("payment")}
                   />{" "}
-                  Zmniejszenie raty
+                  {t("Zmniejszenie raty")}
                 </label>
                 <label className="check-option">
                   <input
@@ -356,16 +381,16 @@ export default function Home() {
                     checked={overpaymentMode === "duration"}
                     onChange={() => setOverpaymentMode("duration")}
                   />{" "}
-                  Skrócenie okresu spłaty
+                  {t("Skrócenie okresu spłaty")}
                 </label>
               </fieldset>
             </div>
             <article className="result-card mortgage-result">
-              <p className="eyebrow">RATA MIESIĘCZNA</p>
+              <p className="eyebrow">{t("RATA MIESIĘCZNA")}</p>
               <p className="takehome mortgage-payment">{exactMoney.format(mortgage.payment)}</p>
               <div
                 className="mortgage-meter"
-                aria-label={`Kapitał ${Math.round((loan / (mortgage.total || 1)) * 100)}%, odsetki ${Math.round((mortgage.interest / (mortgage.total || 1)) * 100)}%`}
+                aria-label={`${t("Kapitał")} ${Math.round((loan / (mortgage.total || 1)) * 100)}%, ${t("odsetki")} ${Math.round((mortgage.interest / (mortgage.total || 1)) * 100)}%`}
               >
                 <span
                   className="principal-meter"
@@ -373,44 +398,56 @@ export default function Home() {
                 />
                 <span className="interest-meter" />
               </div>
-              <Breakdown label="Pożyczony kapitał" value={loan} />
-              <Breakdown label="Łączne odsetki" value={mortgage.interest} />
+              <Breakdown label={t("Pożyczony kapitał")} value={loan} />
+              <Breakdown label={t("Łączne odsetki")} value={mortgage.interest} />
               <div className="divider" />
-              <Breakdown label="Całkowita kwota do spłaty" value={mortgage.total} />
+              <Breakdown label={t("Całkowita kwota do spłaty")} value={mortgage.total} />
               <Breakdown
-                label="Oszczędność na odsetkach"
+                label={t("Oszczędność na odsetkach")}
                 value={Math.max(0, baselineMortgage.interest - mortgage.interest)}
               />
               <p className="mortgage-footnote">
-                Spłata w {mortgage.months} mies. · Rata powyżej dotyczy pierwszego miesiąca, bez nadpłaty. Nadpłata na
-                koniec każdego miesiąca; oprocentowanie stałe w symulacji.
+                {t(
+                  "Spłata w {months} mies. · Rata powyżej dotyczy pierwszego miesiąca, bez nadpłaty. Nadpłata na koniec każdego miesiąca; oprocentowanie stałe w symulacji.",
+                  { months: mortgage.months },
+                )}
               </p>
-              <p className="mortgage-footnote">Szacunek dla rat równych. Rzeczywista oferta banku może się różnić.</p>
+              <p className="mortgage-footnote">
+                {t("Szacunek dla rat równych. Rzeczywista oferta banku może się różnić.")}
+              </p>
             </article>
           </section>
-          <section className="payment-schedule" aria-label="Harmonogram spłaty">
-            <h2>Harmonogram spłaty</h2>
+          <section className="payment-schedule" aria-label={t("Harmonogram spłaty")}>
+            <h2>{t("Harmonogram spłaty")}</h2>
             <p className="lede" aria-live="polite">
-              Łączny okres spłaty: <strong>{mortgage.months} mies.</strong> ({Math.floor(mortgage.months / 12)} lat i{" "}
-              {mortgage.months % 12} mies.)
+              {t("Łączny okres spłaty:")}{" "}
+              <strong>
+                {mortgage.months} {t("mies.")}
+              </strong>{" "}
+              (
+              {t("{years} lat i {months} mies.", {
+                years: Math.floor(mortgage.months / 12),
+                months: mortgage.months % 12,
+              })}
+              )
             </p>
             <div
               className="table-scroll"
               tabIndex={0}
               role="region"
-              aria-label="Tabela rat — przewijaj, aby zobaczyć wszystkie płatności"
+              aria-label={t("Tabela rat — przewijaj, aby zobaczyć wszystkie płatności")}
             >
               <table>
-                <caption>Raty i nadpłaty miesięczne w PLN</caption>
+                <caption>{t("Raty i nadpłaty miesięczne w PLN")}</caption>
                 <thead>
                   <tr>
-                    <th scope="col">Miesiąc</th>
-                    <th scope="col">Rata</th>
-                    <th scope="col">Odsetki</th>
-                    <th scope="col">Kapitał z nadpłatą</th>
-                    <th scope="col">Nadpłata</th>
-                    <th scope="col">Łączna płatność</th>
-                    <th scope="col">Pozostało</th>
+                    <th scope="col">{t("Miesiąc")}</th>
+                    <th scope="col">{t("Rata")}</th>
+                    <th scope="col">{t("Odsetki")}</th>
+                    <th scope="col">{t("Kapitał z nadpłatą")}</th>
+                    <th scope="col">{t("Nadpłata")}</th>
+                    <th scope="col">{t("Łączna płatność")}</th>
+                    <th scope="col">{t("Pozostało")}</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -426,21 +463,29 @@ export default function Home() {
                   ))}
                 </tbody>
               </table>
-              {!mortgage.schedule.length && <p>Brak rat do spłaty.</p>}
+              {!mortgage.schedule.length && <p>{t("Brak rat do spłaty.")}</p>}
             </div>
           </section>
         </>
       )}
       <footer>
-        <span>Szacunek dla Polski · 2026</span>
+        <span>{t("Szacunek dla Polski · 2026")}</span>
         <span>
-          {tab === "salary"
-            ? exchangeRates
-              ? `Kursy z ${exchangeRates.date} · B2B bez chorobowego i kosztów · ${ppk ? "PPK pracodawcy 1,5%." : "bez PPK."}`
-              : ratesUnavailable
-                ? `Kursy walut niedostępne · B2B bez chorobowego i kosztów · ${ppk ? "PPK pracodawcy 1,5%." : "bez PPK."}`
-                : `Pobieram kursy walut · B2B bez chorobowego i kosztów · ${ppk ? "PPK pracodawcy 1,5%." : "bez PPK."}`
-            : "Rata nie obejmuje prowizji ani ubezpieczeń."}
+          {tab === "salary" ? (
+            <>
+              {exchangeRates
+                ? t("Kursy z {date}", { date: exchangeRates.date })
+                : ratesUnavailable
+                  ? t("Kursy walut niedostępne")
+                  : t("Pobieram kursy walut")}
+              {" · "}
+              {t("B2B bez chorobowego i kosztów")}
+              {" · "}
+              {t(ppk ? "PPK pracodawcy 1,5%." : "bez PPK.")}
+            </>
+          ) : (
+            t("Rata nie obejmuje prowizji ani ubezpieczeń.")
+          )}
         </span>
       </footer>
     </main>
@@ -456,8 +501,9 @@ function CurrencyEquivalent({
   rates: ExchangeRates | null;
   unavailable: boolean;
 }) {
+  const { t } = useLanguage();
   if (!rates)
-    return <p className="currency-equivalents">{unavailable ? "Kursy walut niedostępne" : "Pobieram kursy…"}</p>;
+    return <p className="currency-equivalents">{unavailable ? t("Kursy walut niedostępne") : t("Pobieram kursy…")}</p>;
   return (
     <p className="currency-equivalents">
       {dollars.format(amount * rates.USD)} <span>·</span> {euros.format(amount * rates.EUR)}

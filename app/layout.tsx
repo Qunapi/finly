@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import Pwa from "./components/pwa";
+import { LanguageProvider } from "./components/language-provider";
 
 const base = process.env.GITHUB_REPOSITORY ? `/${process.env.GITHUB_REPOSITORY.split("/")[1]}` : "";
 export const viewport: Viewport = { themeColor: "#6546d7" };
@@ -17,8 +18,10 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="pl">
       <body>
-        {children}
-        <Pwa base={base} />
+        <LanguageProvider>
+          {children}
+          <Pwa base={base} />
+        </LanguageProvider>
       </body>
     </html>
   );
