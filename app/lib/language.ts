@@ -13,6 +13,28 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Roczne wynagrodzenie brutto / przychód bez VAT": {
+    en: "Annual gross salary / revenue excluding VAT",
+    ru: "Годовая зарплата брутто / выручка без НДС",
+  },
+  "Stałe zarobki przez 12 miesięcy. Wyniki miesięczne to średnia roczna — wypłaty w trakcie roku mogą się różnić po wykorzystaniu ulg i limitów.":
+    {
+      en: "Constant earnings for 12 months. Monthly results are annual averages — actual pay can change during the year as allowances and limits are exhausted.",
+      ru: "Постоянный доход в течение 12 месяцев. Месячные результаты — средние за год: выплаты могут меняться по мере исчерпания льгот и лимитов.",
+    },
+  "Średnio na rękę / miesiąc": { en: "Average take-home / month", ru: "В среднем на руки / месяц" },
+  "PIT · średnio miesięcznie": { en: "Income tax · monthly average", ru: "Подоходный налог · в среднем за месяц" },
+  "Na rękę / rok": { en: "Take-home / year", ru: "На руки / год" },
+  "Brutto / przychód rocznie": { en: "Annual gross salary / revenue", ru: "Брутто / выручка за год" },
+  "Model zakłada 100% kwalifikowanego honorarium przy 50% KUP i prawo do ulgi dla młodych przez cały rok.": {
+    en: "The model assumes 100% eligible copyright remuneration when 50% costs are selected, and full-year eligibility for youth tax relief.",
+    ru: "При вычете 50% предполагается, что весь доход соответствует условиям авторского вознаграждения; льгота до 26 лет действует весь год.",
+  },
+  "UoP: PIT 12%/32%, próg 120 000 zł, kwota wolna 30 000 zł, ulga dla młodych do 85 528 zł, limit składek emerytalno-rentowych 282 600 zł. Bez 50% KUP: koszty 3 000 zł rocznie. B2B: pełny rok działalności, standardowy ZUS, bez chorobowego i kosztów; składka zdrowotna po rozliczeniu rocznym. Założenia na 2026 r.; inne dochody i ulgi nie są uwzględniane.":
+    {
+      en: "Employment: 12%/32% income tax, 120 000 PLN bracket, 30 000 PLN tax-free allowance, youth exemption up to 85 528 PLN, pension/disability contribution base capped at 282 600 PLN. Without 50% copyright costs: standard costs of 3 000 PLN/year. B2B: full-year business, standard ZUS, no sickness insurance or expenses; health contributions after annual reconciliation. 2026 assumptions; other income and reliefs are excluded.",
+      ru: "Трудовой договор: налог 12%/32%, порог 120 000 PLN, необлагаемая сумма 30 000 PLN, льгота до 26 лет до 85 528 PLN, предельная база пенсионных взносов 282 600 PLN. Без авторского вычета 50%: стандартные расходы 3 000 PLN/год. B2B: деятельность весь год, обычный ZUS, без страхования по болезни и расходов; медицинские взносы после годового перерасчёта. Условия 2026 года; другие доходы и льготы не учтены.",
+    },
   "Nadpłata w pierwszym miesiącu": { en: "First-month overpayment", ru: "Досрочный платёж в первый месяц" },
   "Stała płatność miesięczna": { en: "Fixed total monthly payment", ru: "Фиксированная общая сумма в месяц" },
   "Stała suma raty i nadpłaty. Gdy rata maleje, nadpłata rośnie. Obie strategie dają ten sam termin spłaty i odsetki; ostatnia płatność może być niższa.":

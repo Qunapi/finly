@@ -178,7 +178,12 @@ export default function Home() {
             <div className="input-panel">
               <label htmlFor="amount">{t("Miesięczne wynagrodzenie brutto / faktura netto")}</label>
               <div className="amount-input">
-                <NumberInput id="amount" value={amount} onChange={setAmount} max={Number.MAX_SAFE_INTEGER} />
+                <NumberInput
+                  id="amount"
+                  value={Math.round(amount * 100) / 100}
+                  onChange={setAmount}
+                  max={Number.MAX_SAFE_INTEGER}
+                />
                 <span>PLN</span>
               </div>
               <input
@@ -202,6 +207,23 @@ export default function Home() {
                   </button>
                 ))}
               </div>
+              <div className="annual-salary-input">
+                <label htmlFor="annual-amount">{t("Roczne wynagrodzenie brutto / przychód bez VAT")}</label>
+                <div className="amount-input">
+                  <NumberInput
+                    id="annual-amount"
+                    value={Math.round(amount * 1200) / 100}
+                    onChange={(value) => setAmount(value / 12)}
+                    max={Number.MAX_SAFE_INTEGER}
+                  />
+                  <span>PLN</span>
+                </div>
+              </div>
+              <p className="salary-assumptions">
+                {t(
+                  "Stałe zarobki przez 12 miesięcy. Wyniki miesięczne to średnia roczna — wypłaty w trakcie roku mogą się różnić po wykorzystaniu ulg i limitów.",
+                )}
+              </p>
               <div className="options">
                 <label className="check-option">
                   <input
@@ -220,7 +242,10 @@ export default function Home() {
                   {t("50% KUP · prawa autorskie")}
                 </label>
                 <small className="kup-note">
-                  {t("Dla kwalifikującego się honorarium; limit 120 000 zł rocznie wspólny z ulgą dla młodych.")}
+                  {t("Dla kwalifikującego się honorarium; limit 120 000 zł rocznie wspólny z ulgą dla młodych.")}{" "}
+                  {t(
+                    "Model zakłada 100% kwalifikowanego honorarium przy 50% KUP i prawo do ulgi dla młodych przez cały rok.",
+                  )}
                 </small>
                 <label className="check-option">
                   <input type="checkbox" checked={ppk} onChange={(event) => setPpk(event.target.checked)} /> PPK · 2%
@@ -244,13 +269,17 @@ export default function Home() {
                   <span className="tag">UoP</span>
                 </div>
                 <p className="takehome">{exactMoney.format(result.uopNet)}</p>
-                <p className="takehome-label">{t("na rękę / miesiąc")}</p>
+                <p className="takehome-label">{t("Średnio na rękę / miesiąc")}</p>
                 <CurrencyEquivalent amount={result.uopNet} rates={exchangeRates} unavailable={ratesUnavailable} />
+                <div className="annual-result">
+                  <Breakdown label={t("Na rękę / rok")} value={result.annualUopNet} />
+                  <Breakdown label={t("Brutto / przychód rocznie")} value={result.annualGross} />
+                </div>
                 <div className="divider" />
                 <Breakdown label={t("Składki społeczne")} value={result.employeeSocial} />
                 <Breakdown label={t("Składka zdrowotna")} value={result.health} />
                 {ppk && <Breakdown label={t("PPK pracownika · 2%")} value={result.employeePpk} />}
-                <Breakdown label={t("Zaliczka na PIT")} value={result.annualTax} />
+                <Breakdown label={t("PIT · średnio miesięcznie")} value={result.monthlyTax} />
                 <p className="equivalent">
                   {t("Taka sama kwota netto na B2B:")}{" "}
                   <strong>
@@ -266,8 +295,12 @@ export default function Home() {
                   <span className="tag">JDG</span>
                 </div>
                 <p className="takehome">{exactMoney.format(result.b2bNet)}</p>
-                <p className="takehome-label">{t("na rękę / miesiąc")}</p>
+                <p className="takehome-label">{t("Średnio na rękę / miesiąc")}</p>
                 <CurrencyEquivalent amount={result.b2bNet} rates={exchangeRates} unavailable={ratesUnavailable} />
+                <div className="annual-result">
+                  <Breakdown label={t("Na rękę / rok")} value={result.annualB2bNet} />
+                  <Breakdown label={t("Brutto / przychód rocznie")} value={result.annualGross} />
+                </div>
                 <p className="equivalent">
                   {t("Pensja na UoP z takim samym netto:")}{" "}
                   <strong>
@@ -282,6 +315,11 @@ export default function Home() {
               </article>
             </div>
           </section>
+          <p className="salary-assumptions">
+            {t(
+              "UoP: PIT 12%/32%, próg 120 000 zł, kwota wolna 30 000 zł, ulga dla młodych do 85 528 zł, limit składek emerytalno-rentowych 282 600 zł. Bez 50% KUP: koszty 3 000 zł rocznie. B2B: pełny rok działalności, standardowy ZUS, bez chorobowego i kosztów; składka zdrowotna po rozliczeniu rocznym. Założenia na 2026 r.; inne dochody i ulgi nie są uwzględniane.",
+            )}
+          </p>
         </>
       ) : (
         <>

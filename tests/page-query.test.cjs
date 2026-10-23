@@ -152,3 +152,13 @@ test("overpayment checkbox defaults on and preserves the amount while disabled i
   assert.equal(new URLSearchParams(salary).has("overpayOn"), false);
   assert.equal(new URLSearchParams(salary).get("lang"), "ru");
 });
+
+test("annual salary input survives shared URLs through the linked monthly amount", () => {
+  const { defaultCalculatorState, writeCalculatorQuery, parseCalculatorQuery } = queryModule.exports;
+  const annual = 500000.01;
+  const query = writeCalculatorQuery("?lang=ru&campaign=annual", { ...defaultCalculatorState, amount: annual / 12 });
+  const restored = parseCalculatorQuery(query, "/salary");
+  assert.equal(Math.round(restored.amount * 1200) / 100, annual);
+  assert.equal(new URLSearchParams(query).get("lang"), "ru");
+  assert.equal(new URLSearchParams(query).get("campaign"), "annual");
+});
