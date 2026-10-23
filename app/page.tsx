@@ -288,6 +288,24 @@ export default function Home() {
                   </button>
                 ))}
               </div>
+              <div className="quick-amounts annual-adjustments" aria-label={t("Zmień roczne wynagrodzenie")}>
+                {[-50000, 50000].map((change) => (
+                  <button
+                    key={change}
+                    type="button"
+                    disabled={change < 0 ? amount <= 0 : amount * 12 >= Number.MAX_SAFE_INTEGER}
+                    onClick={() =>
+                      setAmount(
+                        (current) =>
+                          Math.min(Number.MAX_SAFE_INTEGER, Math.max(0, Math.round(current * 1200) / 100 + change)) /
+                          12,
+                      )
+                    }
+                  >
+                    {change < 0 ? "−50k" : "+50k"}
+                  </button>
+                ))}
+              </div>
               <p className="salary-assumptions">
                 {t(
                   "Stałe zarobki przez 12 miesięcy. Wyniki miesięczne to średnia roczna — wypłaty w trakcie roku mogą się różnić po wykorzystaniu ulg i limitów.",

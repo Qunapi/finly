@@ -574,3 +574,10 @@ footer {
 .currency-equivalents {
   min-height: 1.5em;
 }
+.annual-adjustments {
+  grid-template-columns: repeat(2, 1fr);
+}
+.annual-adjustments button:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
