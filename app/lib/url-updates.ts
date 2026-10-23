@@ -61,3 +61,7 @@ export function queueUrlUpdate(key: string, patch: UrlPatch) {
   }
   updater.queue(key, patch);
 }
+
+export function flushUrlUpdates() {
+  updater?.flush();
+}
