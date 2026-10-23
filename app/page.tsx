@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { queueUrlUpdate } from "./lib/url-updates";
 import { useLanguage } from "./components/language-provider";
 import { numberFormat, parseNumberInput } from "./lib/number-format";
 import {
@@ -107,25 +108,24 @@ export default function Home() {
 
   useEffect(() => {
     if (!queryLoaded) return;
-    const query = writeCalculatorQuery(window.location.search, {
-      tab,
-      amount,
-      youthRelief,
-      copyrightKup,
-      ppk,
-      loan,
-      propertyPrice,
-      downPaymentPercent,
-      rate,
-      years,
-      monthlyOverpayment,
-      overpaymentEnabled,
-      overpaymentMode,
+    queueUrlUpdate("calculator", (url) => {
+      url.pathname = writeCalculatorPath(url.pathname, tab);
+      url.search = writeCalculatorQuery(url.search, {
+        tab,
+        amount,
+        youthRelief,
+        copyrightKup,
+        ppk,
+        loan,
+        propertyPrice,
+        downPaymentPercent,
+        rate,
+        years,
+        monthlyOverpayment,
+        overpaymentEnabled,
+        overpaymentMode,
+      });
     });
-    const next = `${writeCalculatorPath(window.location.pathname, tab)}?${query}${window.location.hash}`;
-    if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-      window.history.replaceState(null, "", next);
-    }
   }, [
     queryLoaded,
     tab,

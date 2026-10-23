@@ -1,5 +1,6 @@
 "use client";
 import { createContext, useCallback, useContext, useEffect, useState } from "react";
+import { queueUrlUpdate } from "../lib/url-updates";
 import { chooseLanguage, translate, type Language } from "../lib/language";
 
 type LanguageContextValue = {
@@ -32,12 +33,7 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     if (!ready) return;
     document.documentElement.lang = language;
     document.title = translate(language, "Finly — kalkulatory finansowe");
-    const url = new URL(window.location.href);
-    url.searchParams.set("lang", language);
-    const next = `${url.pathname}${url.search}${url.hash}`;
-    if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
-      window.history.replaceState(null, "", next);
-    }
+    queueUrlUpdate("language", (url) => url.searchParams.set("lang", language));
   }, [ready, language]);
   const setLanguage = useCallback((next: Language) => {
     updateLanguage(next);
