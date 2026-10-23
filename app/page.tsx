@@ -220,6 +220,18 @@ export default function Home() {
                   <span>PLN</span>
                 </div>
               </div>
+              <div className="quick-amounts" aria-label={t("Szybki wybór rocznego wynagrodzenia")}>
+                {Array.from({ length: 10 }, (_, index) => (index + 1) * 100000).map((preset) => (
+                  <button
+                    key={preset}
+                    type="button"
+                    aria-pressed={Math.round(amount * 1200) / 100 === preset}
+                    onClick={() => setAmount(preset / 12)}
+                  >
+                    {preset === 1000000 ? "1kk" : `${preset / 1000}k`}
+                  </button>
+                ))}
+              </div>
               <p className="salary-assumptions">
                 {t(
                   "Stałe zarobki przez 12 miesięcy. Wyniki miesięczne to średnia roczna — wypłaty w trakcie roku mogą się różnić po wykorzystaniu ulg i limitów.",

@@ -13,6 +13,7 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Szybki wybór rocznego wynagrodzenia": { en: "Annual salary presets", ru: "Быстрый выбор годовой зарплаты" },
   "Roczne wynagrodzenie brutto / przychód bez VAT": {
     en: "Annual gross salary / revenue excluding VAT",
     ru: "Годовая зарплата брутто / выручка без НДС",
