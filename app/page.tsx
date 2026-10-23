@@ -186,6 +186,7 @@ export default function Home() {
                 />
                 <span>PLN</span>
               </div>
+              <CurrencyEquivalent amount={amount} rates={exchangeRates} unavailable={ratesUnavailable} />
               <input
                 aria-label={t("Wynagrodzenie")}
                 className="range"
