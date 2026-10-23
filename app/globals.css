@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap");
+@import "./fonts/fonts.css";
 
 :root {
   --ink: #172238;
@@ -547,4 +547,30 @@ footer {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.65;
+}
+.startup-shell {
+  min-height: 100svh;
+}
+.startup-placeholder {
+  padding-top: 100px;
+}
+.startup-placeholder div {
+  height: 36px;
+  max-width: 480px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  background: var(--line);
+}
+.startup-placeholder div:nth-child(2) {
+  max-width: 340px;
+}
+.startup-placeholder div:nth-child(3) {
+  height: 220px;
+  max-width: 100%;
+  margin-top: 48px;
+  background: white;
+  border: 1px solid var(--line);
+}
+.currency-equivalents {
+  min-height: 1.5em;
 }

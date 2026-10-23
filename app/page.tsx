@@ -3,7 +3,12 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "./components/language-provider";
 import { numberFormat, parseNumberInput } from "./lib/number-format";
-import { fetchExchangeRates, type ExchangeRates } from "./lib/exchange-rates";
+import {
+  fetchExchangeRates,
+  readCachedExchangeRates,
+  cacheExchangeRates,
+  type ExchangeRates,
+} from "./lib/exchange-rates";
 import { calculateSalary, findEquivalentAmount } from "./lib/salary";
 import { calculateMortgage, type OverpaymentMode } from "./lib/mortgage";
 import {
@@ -33,13 +38,14 @@ const euros = new Intl.NumberFormat("pl-PL", {
 });
 const quickAmounts = [20000, 25000, 30000, 40000, 50000, 60000];
 export default function Home() {
-  const { t, language, setLanguage } = useLanguage();
+  const { t, language, ready: languageReady, setLanguage } = useLanguage();
   const [tab, setTab] = useState<"salary" | "mortgage">("salary");
   const [amount, setAmount] = useState(15000);
   const [youthRelief, setYouthRelief] = useState(true);
   const [ppk, setPpk] = useState(true);
   const [copyrightKup, setCopyrightKup] = useState(true);
   const [queryLoaded, setQueryLoaded] = useState(false);
+  const [fontsReady, setFontsReady] = useState(false);
   const [propertyPrice, setPropertyPrice] = useState(defaultCalculatorState.propertyPrice);
   const [downPaymentPercent, setDownPaymentPercent] = useState(defaultCalculatorState.downPaymentPercent);
   const downPayment = Math.round(propertyPrice * downPaymentPercent) / 100;
@@ -61,9 +67,18 @@ export default function Home() {
 
   useEffect(() => {
     let active = true;
+    try {
+      const cached = readCachedExchangeRates(localStorage);
+      if (cached) setExchangeRates(cached);
+    } catch {}
     fetchExchangeRates()
       .then((rates) => {
-        if (active) setExchangeRates(rates);
+        if (active) {
+          setExchangeRates(rates);
+          try {
+            cacheExchangeRates(localStorage, rates);
+          } catch {}
+        }
       })
       .catch(() => {
         if (active) setRatesUnavailable(true);
@@ -107,11 +122,10 @@ export default function Home() {
       overpaymentEnabled,
       overpaymentMode,
     });
-    window.history.replaceState(
-      null,
-      "",
-      `${writeCalculatorPath(window.location.pathname, tab)}?${query}${window.location.hash}`,
-    );
+    const next = `${writeCalculatorPath(window.location.pathname, tab)}?${query}${window.location.hash}`;
+    if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+      window.history.replaceState(null, "", next);
+    }
   }, [
     queryLoaded,
     tab,
@@ -128,6 +142,43 @@ export default function Home() {
     overpaymentEnabled,
     overpaymentMode,
   ]);
+
+  useEffect(() => {
+    let active = true;
+    const timer = window.setTimeout(() => {
+      if (active) setFontsReady(true);
+    }, 1500);
+    const fonts = document.fonts;
+    const loaded = fonts
+      ? Promise.allSettled([fonts.load('400 16px "DM Sans"', "Aą"), fonts.load("700 16px Manrope", "AąЯ")])
+      : Promise.resolve();
+    loaded.then(() => {
+      if (active) {
+        window.clearTimeout(timer);
+        setFontsReady(true);
+      }
+    });
+    return () => {
+      active = false;
+      window.clearTimeout(timer);
+    };
+  }, []);
+
+  if (!queryLoaded || !languageReady || !fontsReady)
+    return (
+      <main className="shell startup-shell" aria-busy="true" aria-label="Finly">
+        <header className="topbar">
+          <span className="brand">
+            finly<span>.</span>
+          </span>
+        </header>
+        <div className="startup-placeholder" aria-hidden="true">
+          <div />
+          <div />
+          <div />
+        </div>
+      </main>
+    );
 
   return (
     <main className="shell">

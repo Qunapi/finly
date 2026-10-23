@@ -4,6 +4,7 @@ import { chooseLanguage, translate, type Language } from "../lib/language";
 
 type LanguageContextValue = {
   language: Language;
+  ready: boolean;
   setLanguage: (language: Language) => void;
   t: (text: string, values?: Record<string, string | number>) => string;
 };
@@ -33,7 +34,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     document.title = translate(language, "Finly — kalkulatory finansowe");
     const url = new URL(window.location.href);
     url.searchParams.set("lang", language);
-    window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`);
+    const next = `${url.pathname}${url.search}${url.hash}`;
+    if (next !== `${window.location.pathname}${window.location.search}${window.location.hash}`) {
+      window.history.replaceState(null, "", next);
+    }
   }, [ready, language]);
   const setLanguage = useCallback((next: Language) => {
     updateLanguage(next);
@@ -42,7 +46,9 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     } catch {}
   }, []);
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t: (text, values) => translate(language, text, values) }}>
+    <LanguageContext.Provider
+      value={{ language, ready, setLanguage, t: (text, values) => translate(language, text, values) }}
+    >
       {children}
     </LanguageContext.Provider>
   );

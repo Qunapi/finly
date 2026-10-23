@@ -5,7 +5,7 @@ import { useLanguage } from "./language-provider";
 type InstallPrompt = Event & { prompt: () => Promise<void>; userChoice: Promise<{ outcome: string }> };
 
 export default function Pwa({ base }: { base: string }) {
-  const { t } = useLanguage();
+  const { t, ready } = useLanguage();
   const registration = useRef<ServiceWorkerRegistration | null>(null);
   const [waiting, setWaiting] = useState<ServiceWorker | null>(null);
   const [install, setInstall] = useState<InstallPrompt | null>(null);
@@ -73,6 +73,8 @@ export default function Pwa({ base }: { base: string }) {
       document.removeEventListener("visibilitychange", check);
     };
   }, [base]);
+
+  if (!ready) return null;
 
   return (
     <aside className="pwa-controls" aria-label={t("Aplikacja Finly")}>

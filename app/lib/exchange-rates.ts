@@ -32,3 +32,25 @@ export async function fetchExchangeRates(): Promise<ExchangeRates> {
   const dates = [...new Set([eur.date, usd.date])].sort();
   return { EUR: eur.rate, USD: usd.rate, date: dates.join(" – ") };
 }
+
+const CACHE_KEY = "finly-exchange-rates";
+export function readCachedExchangeRates(storage: Pick<Storage, "getItem">): ExchangeRates | null {
+  try {
+    const value: unknown = JSON.parse(storage.getItem(CACHE_KEY) ?? "null");
+    if (!value || typeof value !== "object") return null;
+    const rates = value as ExchangeRates;
+    return Number.isFinite(rates.EUR) &&
+      rates.EUR > 0 &&
+      Number.isFinite(rates.USD) &&
+      rates.USD > 0 &&
+      typeof rates.date === "string" &&
+      /^\d{4}-\d{2}-\d{2}( – \d{4}-\d{2}-\d{2})?$/.test(rates.date)
+      ? rates
+      : null;
+  } catch {
+    return null;
+  }
+}
+export function cacheExchangeRates(storage: Pick<Storage, "setItem">, rates: ExchangeRates): void {
+  storage.setItem(CACHE_KEY, JSON.stringify(rates));
+}

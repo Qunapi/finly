@@ -54,3 +54,34 @@ test("rejects unavailable or malformed exchange rates", async (t) => {
   t.mock.method(global, "fetch", async () => ({ ok: false }));
   await assert.rejects(ratesModule.exports.fetchExchangeRates(), /unavailable/);
 });
+
+test("cached rates retain their date and can be restored without a loading flash", () => {
+  const { cacheExchangeRates, readCachedExchangeRates } = ratesModule.exports;
+  const data = new Map();
+  const storage = { getItem: (key) => data.get(key) ?? null, setItem: (key, value) => data.set(key, value) };
+  const rates = { EUR: 0.23, USD: 0.27, date: "2026-10-18 – 2026-10-19" };
+  assert.equal(readCachedExchangeRates(storage), null);
+  cacheExchangeRates(storage, rates);
+  assert.deepEqual(readCachedExchangeRates(storage), rates);
+});
+
+test("corrupt or blocked rate storage is ignored", () => {
+  const { readCachedExchangeRates } = ratesModule.exports;
+  for (const value of [
+    "bad json",
+    "null",
+    "{}",
+    '{"EUR":-1,"USD":0.27,"date":"2026-10-23"}',
+    '{"EUR":0.23,"USD":0.27,"date":"bad"}',
+  ]) {
+    assert.equal(readCachedExchangeRates({ getItem: () => value }), null);
+  }
+  assert.equal(
+    readCachedExchangeRates({
+      getItem: () => {
+        throw new Error("blocked");
+      },
+    }),
+    null,
+  );
+});
