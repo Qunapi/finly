@@ -270,6 +270,11 @@ export default function Home() {
                   />
                   <span>PLN</span>
                 </div>
+                <CurrencyEquivalent
+                  amount={Math.round(amount * 1200) / 100}
+                  rates={exchangeRates}
+                  unavailable={ratesUnavailable}
+                />
               </div>
               <div className="quick-amounts" aria-label={t("Szybki wybór rocznego wynagrodzenia")}>
                 {Array.from({ length: 10 }, (_, index) => (index + 1) * 100000).map((preset) => (
