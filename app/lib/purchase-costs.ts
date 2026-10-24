@@ -2,7 +2,6 @@ export type PurchaseCostSettings = {
   agent: boolean;
   pcc: boolean;
   fixedFees: boolean;
-  mortgageFee: boolean;
 };
 // Budget estimates for a resale apartment; actual supplier/bank quotes vary.
 export const PURCHASE_COST_ASSUMPTIONS = {
@@ -11,14 +10,8 @@ export const PURCHASE_COST_ASSUMPTIONS = {
   notary: 5000,
   inspection: 1500,
   valuation: 750,
-  mortgageFeePercent: 2,
 } as const;
-export function calculatePurchaseCosts(
-  price: number,
-  downPayment: number,
-  loan: number,
-  settings: PurchaseCostSettings,
-) {
+export function calculatePurchaseCosts(price: number, downPayment: number, settings: PurchaseCostSettings) {
   const money = (value: number) => Math.round(value * 100) / 100;
   const agent = settings.agent ? money(price * 0.03) : 0;
   const amounts = {
@@ -27,7 +20,6 @@ export function calculatePurchaseCosts(
     fixedFees: settings.fixedFees
       ? PURCHASE_COST_ASSUMPTIONS.notary + PURCHASE_COST_ASSUMPTIONS.inspection + PURCHASE_COST_ASSUMPTIONS.valuation
       : 0,
-    mortgageFee: settings.mortgageFee ? money((loan * PURCHASE_COST_ASSUMPTIONS.mortgageFeePercent) / 100) : 0,
   };
   const total = money(Object.values(amounts).reduce((sum, value) => sum + value, 0));
   return {

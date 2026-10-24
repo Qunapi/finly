@@ -62,7 +62,7 @@ export default function Home() {
   const [ratesUnavailable, setRatesUnavailable] = useState(false);
   const result = calculateSalary(amount, youthRelief, copyrightKup, ppk);
   const mortgage = calculateMortgage(loan, rate, years, overpaymentEnabled ? monthlyOverpayment : 0, overpaymentMode);
-  const purchase = calculatePurchaseCosts(propertyPrice, downPayment, loan, purchaseCosts);
+  const purchase = calculatePurchaseCosts(propertyPrice, downPayment, purchaseCosts);
   const baselineMortgage = calculateMortgage(loan, rate, years);
   const b2bEquivalent = findEquivalentAmount(result.uopNet, "b2b", youthRelief, copyrightKup, ppk);
   const uopEquivalent = findEquivalentAmount(result.b2bNet, "uop", youthRelief, copyrightKup, ppk);
@@ -597,7 +597,6 @@ export default function Home() {
                     ["agent", "Pośrednik · 3% łącznie, w tym VAT 23%"],
                     ["pcc", "PCC · 2% wartości nieruchomości"],
                     ["fixedFees", "Opłaty stałe · 7 250 zł"],
-                    ["mortgageFee", "Prowizja banku · 2% kwoty kredytu"],
                   ] as const
                 ).map(([key, label]) => (
                   <div className="purchase-cost-item" key={key}>

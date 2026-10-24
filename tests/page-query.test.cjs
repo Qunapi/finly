@@ -173,10 +173,14 @@ test("purchase cost checkboxes survive sharing and obsolete fee inputs are remov
   assert.equal("notaryAmount" in state.purchaseCosts, false);
   assert.equal("mortgageFeePercent" in state.purchaseCosts, false);
   assert.deepEqual(parseCalculatorQuery(writeCalculatorQuery("?lang=ru", state), "/mortgage"), state);
-  const migrated = new URLSearchParams(writeCalculatorQuery("?notaryCost=4200&bankPercent=1.5&feeVat=1", state));
+  const migrated = new URLSearchParams(
+    writeCalculatorQuery("?notaryCost=4200&bankPercent=1.5&feeVat=1&feeBank=1", state),
+  );
   assert.equal(migrated.has("notaryCost"), false);
   assert.equal(migrated.has("bankPercent"), false);
   assert.equal(migrated.has("feeVat"), false);
+  assert.equal(migrated.has("feeBank"), false);
+  assert.equal("mortgageFee" in state.purchaseCosts, false);
   const salary = writeCalculatorQuery("?feePcc=0&notaryCost=4200", { ...defaultCalculatorState, tab: "salary" });
   assert.equal(new URLSearchParams(salary).has("feePcc"), false);
   assert.equal(new URLSearchParams(salary).has("notaryCost"), false);
