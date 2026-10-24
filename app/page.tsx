@@ -597,6 +597,7 @@ export default function Home() {
                     ["agent", "Pośrednik · 3% łącznie, w tym VAT 23%"],
                     ["pcc", "PCC · 2% wartości nieruchomości"],
                     ["fixedFees", "Opłaty stałe · 7 250 zł"],
+                    ["emergency", "Rezerwa awaryjna · 100 000 zł"],
                   ] as const
                 ).map(([key, label]) => (
                   <div className="purchase-cost-item" key={key}>
@@ -612,6 +613,13 @@ export default function Home() {
                       <span>{t(label)}</span>
                       <strong>{exactMoney.format(purchase.amounts[key])}</strong>
                     </label>
+                    {key === "emergency" && (
+                      <p className="salary-assumptions">
+                        {t(
+                          "Opcjonalna poduszka finansowa, domyślnie wyłączona. Zwiększa potrzebną gotówkę, nie cenę zakupu ani kwotę kredytu.",
+                        )}
+                      </p>
+                    )}
                     {key === "fixedFees" && (
                       <p className="salary-assumptions">
                         {t("Notariusz, wypisy i sąd: 5 000 zł; inspekcja: 1 500 zł; wycena: 750 zł. Łącznie 7 250 zł.")}
@@ -632,6 +640,7 @@ export default function Home() {
                 <h3>{t("Budżet zakupu")}</h3>
                 <Breakdown label={t("Dodatkowe koszty zakupu")} value={purchase.total} />
                 <Breakdown label={t("Wkład własny")} value={downPayment} />
+                <Breakdown label={t("Rezerwa awaryjna")} value={purchase.amounts.emergency} />
                 <div className="divider" />
                 <Breakdown label={t("Gotówka potrzebna na start")} value={purchase.upfront} />
                 <CurrencyEquivalent amount={purchase.upfront} rates={exchangeRates} unavailable={ratesUnavailable} />

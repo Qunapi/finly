@@ -187,3 +187,15 @@ test("purchase cost checkboxes survive sharing and obsolete fee inputs are remov
   const invalid = parseCalculatorQuery("?notaryCost=-1&bankPercent=100&feeAgent=bad");
   assert.equal(invalid.purchaseCosts.agent, true);
 });
+
+test("emergency reserve defaults off and survives shared mortgage URLs when enabled", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery } = queryModule.exports;
+  assert.equal(parseCalculatorQuery("", "/mortgage").purchaseCosts.emergency, false);
+  const state = parseCalculatorQuery("?emergency=1&lang=en", "/mortgage");
+  assert.equal(state.purchaseCosts.emergency, true);
+  const query = writeCalculatorQuery("?lang=en", state);
+  assert.equal(new URLSearchParams(query).get("emergency"), "1");
+  assert.deepEqual(parseCalculatorQuery(query, "/mortgage"), state);
+  const salary = writeCalculatorQuery(query, { ...state, tab: "salary" });
+  assert.equal(new URLSearchParams(salary).has("emergency"), false);
+});

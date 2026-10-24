@@ -26,6 +26,7 @@ export const defaultCalculatorState: CalculatorState = {
 
     pcc: true,
     fixedFees: true,
+    emergency: false,
   },
   youthRelief: true,
   copyrightKup: true,
@@ -67,6 +68,7 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
 
       pcc: boolean("feePcc", true),
       fixedFees: boolean("feeFixed", true),
+      emergency: boolean("emergency", false),
     },
     amount: number("amount", defaultCalculatorState.amount, 0, Number.MAX_SAFE_INTEGER),
     youthRelief: boolean("youth", defaultCalculatorState.youthRelief),
@@ -88,6 +90,7 @@ const feeQueryKeys: Record<keyof PurchaseCostSettings, string> = {
 
   pcc: "feePcc",
   fixedFees: "feeFixed",
+  emergency: "emergency",
 };
 
 export function writeCalculatorQuery(search: string, state: CalculatorState): string {

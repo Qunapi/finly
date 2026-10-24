@@ -13,6 +13,16 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Rezerwa awaryjna · 100 000 zł": {
+    en: "Emergency reserve · 100 000 PLN",
+    ru: "Резерв на непредвиденные расходы · 100 000 PLN",
+  },
+  "Rezerwa awaryjna": { en: "Emergency reserve", ru: "Резерв на непредвиденные расходы" },
+  "Opcjonalna poduszka finansowa, domyślnie wyłączona. Zwiększa potrzebną gotówkę, nie cenę zakupu ani kwotę kredytu.":
+    {
+      en: "Optional financial cushion, off by default. Adds to cash needed, not the purchase price or loan amount.",
+      ru: "Дополнительная финансовая подушка, по умолчанию выключена. Увеличивает необходимые средства, а не цену покупки или кредит.",
+    },
   "Opłaty stałe · 7 250 zł": { en: "Combined fixed fees · 7 250 PLN", ru: "Фиксированные расходы · 7 250 PLN" },
   "Notariusz, wypisy i sąd: 5 000 zł; inspekcja: 1 500 zł; wycena: 750 zł. Łącznie 7 250 zł.": {
     en: "Notary, copies and court: 5 000 PLN; inspection: 1 500 PLN; valuation: 750 PLN. Total: 7 250 PLN.",
