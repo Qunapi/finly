@@ -11,6 +11,7 @@ import {
   type ExchangeRates,
 } from "./lib/exchange-rates";
 import { calculateSalary, findEquivalentAmount } from "./lib/salary";
+import { calculatePurchaseCosts } from "./lib/purchase-costs";
 import { calculateMortgage, type OverpaymentMode } from "./lib/mortgage";
 import {
   defaultCalculatorState,
@@ -47,6 +48,7 @@ export default function Home() {
   const [copyrightKup, setCopyrightKup] = useState(true);
   const [queryLoaded, setQueryLoaded] = useState(false);
   const [fontsReady, setFontsReady] = useState(false);
+  const [purchaseCosts, setPurchaseCosts] = useState(defaultCalculatorState.purchaseCosts);
   const [propertyPrice, setPropertyPrice] = useState(defaultCalculatorState.propertyPrice);
   const [downPaymentPercent, setDownPaymentPercent] = useState(defaultCalculatorState.downPaymentPercent);
   const downPayment = Math.round(propertyPrice * downPaymentPercent) / 100;
@@ -60,6 +62,7 @@ export default function Home() {
   const [ratesUnavailable, setRatesUnavailable] = useState(false);
   const result = calculateSalary(amount, youthRelief, copyrightKup, ppk);
   const mortgage = calculateMortgage(loan, rate, years, overpaymentEnabled ? monthlyOverpayment : 0, overpaymentMode);
+  const purchase = calculatePurchaseCosts(propertyPrice, downPayment, loan, purchaseCosts);
   const baselineMortgage = calculateMortgage(loan, rate, years);
   const b2bEquivalent = findEquivalentAmount(result.uopNet, "b2b", youthRelief, copyrightKup, ppk);
   const uopEquivalent = findEquivalentAmount(result.b2bNet, "uop", youthRelief, copyrightKup, ppk);
@@ -97,6 +100,7 @@ export default function Home() {
     setCopyrightKup(state.copyrightKup);
     setPpk(state.ppk);
     setPropertyPrice(state.propertyPrice);
+    setPurchaseCosts(state.purchaseCosts);
     setDownPaymentPercent(state.downPaymentPercent);
     setRate(state.rate);
     setYears(state.years);
@@ -118,6 +122,7 @@ export default function Home() {
         ppk,
         loan,
         propertyPrice,
+        purchaseCosts,
         downPaymentPercent,
         rate,
         years,
@@ -135,6 +140,7 @@ export default function Home() {
     ppk,
     loan,
     propertyPrice,
+    purchaseCosts,
     downPaymentPercent,
     rate,
     years,
@@ -575,6 +581,73 @@ export default function Home() {
                 {t("Szacunek dla rat równych. Rzeczywista oferta banku może się różnić.")}
               </p>
             </article>
+          </section>
+          <section className="purchase-costs" aria-label={t("Koszty zakupu mieszkania")}>
+            <h2>{t("Koszty zakupu mieszkania")}</h2>
+            <p className="salary-assumptions">
+              {t(
+                "Szacunek dla rynku wtórnego. Wszystkie koszty włączone domyślnie; odznacz PCC przy zwolnieniu. Opłaty bankowe i kwoty stałe są założeniami do edycji. Koszty płatne z własnych środków, poza kwotą kredytu.",
+              )}
+            </p>
+            <div className="calculator purchase-cost-grid">
+              <fieldset className="input-panel purchase-cost-options">
+                <legend className="sr-only">{t("Uwzględnione koszty")}</legend>
+                {(
+                  [
+                    ["agent", "Pośrednik · 3% ceny", null],
+                    ["agentVat", "VAT · 23% prowizji pośrednika", null],
+                    ["pcc", "PCC · 2% wartości nieruchomości", null],
+                    ["notary", "Notariusz, wypisy i opłaty sądowe", "notaryAmount"],
+                    ["inspection", "Inspekcja techniczna", "inspectionAmount"],
+                    ["valuation", "Wycena bankowa", "valuationAmount"],
+                    ["mortgageFee", "Prowizja banku", "mortgageFeePercent"],
+                  ] as const
+                ).map(([key, label, field]) => (
+                  <div className="purchase-cost-item" key={key}>
+                    <label className="check-option" htmlFor={`cost-${key}`}>
+                      <input
+                        id={`cost-${key}`}
+                        type="checkbox"
+                        checked={purchaseCosts[key]}
+                        onChange={(event) =>
+                          setPurchaseCosts((current) => ({ ...current, [key]: event.target.checked }))
+                        }
+                      />
+                      <span>{t(label)}</span>
+                      <strong>{exactMoney.format(purchase.amounts[key])}</strong>
+                    </label>
+                    {field && (
+                      <fieldset className="purchase-cost-edit" disabled={!purchaseCosts[key]}>
+                        <legend className="sr-only">{t(label)}</legend>
+                        <MoneyInput
+                          id={`cost-${field}`}
+                          label={t(field === "mortgageFeePercent" ? "Procent kwoty kredytu" : "Szacowana opłata")}
+                          value={purchaseCosts[field]}
+                          max={field === "mortgageFeePercent" ? 10 : 6250000}
+                          suffix={field === "mortgageFeePercent" ? "%" : "PLN"}
+                          onChange={(value) => setPurchaseCosts((current) => ({ ...current, [field]: value }))}
+                        />
+                      </fieldset>
+                    )}
+                  </div>
+                ))}
+              </fieldset>
+              <article className="result-card purchase-cost-summary" aria-live="polite">
+                <h3>{t("Budżet zakupu")}</h3>
+                <Breakdown label={t("Dodatkowe koszty zakupu")} value={purchase.total} />
+                <Breakdown label={t("Wkład własny")} value={downPayment} />
+                <div className="divider" />
+                <Breakdown label={t("Gotówka potrzebna na start")} value={purchase.upfront} />
+                <CurrencyEquivalent amount={purchase.upfront} rates={exchangeRates} unavailable={ratesUnavailable} />
+                <div className="divider" />
+                <Breakdown label={t("Cena mieszkania + koszty zakupu")} value={purchase.purchaseTotal} />
+                <p className="mortgage-footnote">
+                  {t(
+                    "Nie obejmuje odsetek, ubezpieczenia kredytu, remontu ani wyposażenia. PCC przyjęto od podanej ceny jako przybliżenia wartości rynkowej.",
+                  )}
+                </p>
+              </article>
+            </div>
           </section>
           <section className="payment-schedule" aria-label={t("Harmonogram spłaty")}>
             <h2>{t("Harmonogram spłaty")}</h2>

@@ -13,6 +13,34 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Koszty zakupu mieszkania": { en: "Apartment purchase costs", ru: "Расходы на покупку квартиры" },
+  "Szacunek dla rynku wtórnego. Wszystkie koszty włączone domyślnie; odznacz PCC przy zwolnieniu. Opłaty bankowe i kwoty stałe są założeniami do edycji. Koszty płatne z własnych środków, poza kwotą kredytu.":
+    {
+      en: "Resale-market estimate. All costs are enabled by default; untick PCC if exempt. Bank fees and fixed amounts are editable assumptions. Costs are paid upfront, separately from the loan.",
+      ru: "Оценка для вторичного рынка. Все расходы включены по умолчанию; отключите PCC при освобождении. Комиссии банка и фиксированные суммы можно изменить. Расходы оплачиваются своими средствами сверх кредита.",
+    },
+  "Uwzględnione koszty": { en: "Included costs", ru: "Учтённые расходы" },
+  "Pośrednik · 3% ceny": { en: "Agent · 3% of price", ru: "Агент · 3% стоимости" },
+  "VAT · 23% prowizji pośrednika": { en: "VAT · 23% of agent fee", ru: "НДС · 23% комиссии агента" },
+  "PCC · 2% wartości nieruchomości": { en: "PCC · 2% of property value", ru: "PCC · 2% стоимости недвижимости" },
+  "Notariusz, wypisy i opłaty sądowe": {
+    en: "Notary, deed copies and court fees",
+    ru: "Нотариус, копии и судебные сборы",
+  },
+  "Inspekcja techniczna": { en: "Technical inspection", ru: "Техническая проверка" },
+  "Wycena bankowa": { en: "Bank valuation", ru: "Оценка для банка" },
+  "Prowizja banku": { en: "Mortgage arrangement fee", ru: "Комиссия банка" },
+  "Procent kwoty kredytu": { en: "Percentage of loan amount", ru: "Процент от суммы кредита" },
+  "Szacowana opłata": { en: "Estimated fee", ru: "Оценка суммы" },
+  "Budżet zakupu": { en: "Purchase budget", ru: "Бюджет покупки" },
+  "Dodatkowe koszty zakupu": { en: "Additional purchase costs", ru: "Дополнительные расходы" },
+  "Gotówka potrzebna na start": { en: "Total upfront cash needed", ru: "Необходимые собственные средства" },
+  "Cena mieszkania + koszty zakupu": { en: "Apartment price + purchase costs", ru: "Стоимость квартиры + расходы" },
+  "Nie obejmuje odsetek, ubezpieczenia kredytu, remontu ani wyposażenia. PCC przyjęto od podanej ceny jako przybliżenia wartości rynkowej.":
+    {
+      en: "Excludes interest, mortgage insurance, renovation and furnishings. PCC uses the entered price as an estimate of market value.",
+      ru: "Без процентов, страхования ипотеки, ремонта и мебели. Для PCC указанная цена используется как оценка рыночной стоимости.",
+    },
   "Zmień roczne wynagrodzenie": { en: "Adjust annual salary", ru: "Изменить годовую зарплату" },
   "Szybki wybór rocznego wynagrodzenia": { en: "Annual salary presets", ru: "Быстрый выбор годовой зарплаты" },
   "Roczne wynagrodzenie brutto / przychód bez VAT": {

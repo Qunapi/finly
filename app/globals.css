@@ -541,3 +541,48 @@ footer {
   opacity: 0.45;
   cursor: default;
 }
+.purchase-costs {
+  margin-top: 32px;
+}
+.purchase-cost-grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  margin-top: 20px;
+  align-items: start;
+}
+.purchase-cost-options {
+  margin: 0;
+  min-width: 0;
+}
+.purchase-cost-item {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--line);
+}
+.purchase-cost-item .check-option {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.purchase-cost-item .check-option input {
+  flex-shrink: 0;
+}
+.purchase-cost-item .check-option strong {
+  margin-left: auto;
+  white-space: nowrap;
+}
+.purchase-cost-edit {
+  border: 0;
+  padding: 0;
+  margin: 12px 0 0 24px;
+  min-width: 0;
+}
+.purchase-cost-edit:disabled {
+  opacity: 0.5;
+}
+.purchase-cost-edit .amount-input input {
+  font-size: 24px;
+}
+@media (max-width: 820px) {
+  .purchase-cost-grid {
+    grid-template-columns: 1fr;
+  }
+}
