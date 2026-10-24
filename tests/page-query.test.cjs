@@ -164,20 +164,22 @@ test("annual salary input survives shared URLs through the linked monthly amount
   assert.equal(new URLSearchParams(query).get("campaign"), "annual");
 });
 
-test("purchase cost defaults and edited fees survive shared links", () => {
+test("purchase cost checkboxes survive sharing and obsolete fee inputs are removed", () => {
   const { defaultCalculatorState, parseCalculatorQuery, writeCalculatorQuery } = queryModule.exports;
-  const state = parseCalculatorQuery("?feeAgent=0&feePcc=0&notaryCost=4200&bankPercent=1.5", "/mortgage");
+  const state = parseCalculatorQuery("?feeAgent=0&feePcc=0&feeFixed=0&notaryCost=4200&bankPercent=1.5", "/mortgage");
   assert.equal(state.purchaseCosts.agent, false);
-  assert.equal(state.purchaseCosts.agentVat, true);
   assert.equal(state.purchaseCosts.pcc, false);
-  assert.equal(state.purchaseCosts.notaryAmount, 4200);
-  assert.equal(state.purchaseCosts.mortgageFeePercent, 1.5);
+  assert.equal(state.purchaseCosts.fixedFees, false);
+  assert.equal("notaryAmount" in state.purchaseCosts, false);
+  assert.equal("mortgageFeePercent" in state.purchaseCosts, false);
   assert.deepEqual(parseCalculatorQuery(writeCalculatorQuery("?lang=ru", state), "/mortgage"), state);
+  const migrated = new URLSearchParams(writeCalculatorQuery("?notaryCost=4200&bankPercent=1.5&feeVat=1", state));
+  assert.equal(migrated.has("notaryCost"), false);
+  assert.equal(migrated.has("bankPercent"), false);
+  assert.equal(migrated.has("feeVat"), false);
   const salary = writeCalculatorQuery("?feePcc=0&notaryCost=4200", { ...defaultCalculatorState, tab: "salary" });
   assert.equal(new URLSearchParams(salary).has("feePcc"), false);
   assert.equal(new URLSearchParams(salary).has("notaryCost"), false);
   const invalid = parseCalculatorQuery("?notaryCost=-1&bankPercent=100&feeAgent=bad");
-  assert.equal(invalid.purchaseCosts.notaryAmount, 0);
-  assert.equal(invalid.purchaseCosts.mortgageFeePercent, 10);
   assert.equal(invalid.purchaseCosts.agent, true);
 });

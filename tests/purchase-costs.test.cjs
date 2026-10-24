@@ -14,64 +14,35 @@ queryModule.filename = filename;
 queryModule.paths = Module._nodeModulePaths(path.dirname(filename));
 queryModule._compile(compiled.outputText, filename);
 
-const settings = {
-  agent: true,
-  agentVat: true,
-  pcc: true,
-  notary: true,
-  inspection: true,
-  valuation: true,
-  mortgageFee: true,
-  notaryAmount: 5000,
-  inspectionAmount: 1500,
-  valuationAmount: 750,
-  mortgageFeePercent: 2,
-};
+const settings = { agent: true, pcc: true, fixedFees: true, mortgageFee: true };
 const { calculatePurchaseCosts } = queryModule.exports;
-test("resale purchase budget includes 3% agency fee, separate VAT and commission on the loan", () => {
+test("agent 3% is VAT-inclusive, fixed fees are combined and totals do not add VAT twice", () => {
   const result = calculatePurchaseCosts(1500000, 300000, 1200000, settings);
-  assert.deepEqual(result.amounts, {
-    agent: 45000,
-    agentVat: 10350,
-    pcc: 30000,
-    notary: 5000,
-    inspection: 1500,
-    valuation: 750,
-    mortgageFee: 24000,
-  });
-  assert.equal(result.total, 116600);
-  assert.equal(result.upfront, 416600);
-  assert.equal(result.purchaseTotal, 1616600);
+  assert.deepEqual(result.amounts, { agent: 45000, pcc: 30000, fixedFees: 7250, mortgageFee: 24000 });
+  assert.equal(result.agentVatIncluded, 8414.63);
+  assert.equal(result.total, 106250);
+  assert.equal(result.upfront, 406250);
+  assert.equal(result.purchaseTotal, 1606250);
 });
-test("each cost can be disabled and VAT never remains without an agent fee", () => {
+test("each combined cost can be excluded independently", () => {
   const baseline = calculatePurchaseCosts(1500000, 300000, 1200000, settings);
-  for (const key of ["agent", "agentVat", "pcc", "notary", "inspection", "valuation", "mortgageFee"]) {
+  for (const key of Object.keys(settings)) {
     const result = calculatePurchaseCosts(1500000, 300000, 1200000, { ...settings, [key]: false });
-    const reduction = baseline.amounts[key] + (key === "agent" ? baseline.amounts.agentVat : 0);
-    assert.equal(result.total, baseline.total - reduction);
+    assert.equal(result.total, baseline.total - baseline.amounts[key]);
+    if (key === "agent") assert.equal(result.agentVatIncluded, 0);
   }
-  const disabled = {
-    ...settings,
-    agent: false,
-    agentVat: false,
-    pcc: false,
-    notary: false,
-    inspection: false,
-    valuation: false,
-    mortgageFee: false,
-  };
-  assert.equal(calculatePurchaseCosts(1500000, 300000, 1200000, disabled).total, 0);
+  assert.equal(
+    calculatePurchaseCosts(1500000, 300000, 1200000, { agent: false, pcc: false, fixedFees: false, mortgageFee: false })
+      .total,
+    0,
+  );
 });
-test("editable fees, cash purchases and rounding are handled", () => {
-  const result = calculatePurchaseCosts(1000000, 1000000, 0, {
-    ...settings,
-    pcc: false,
-    notaryAmount: 3000,
-    inspectionAmount: 500,
-    valuationAmount: 0,
-  });
+test("cash purchases have no bank commission and included VAT is extracted correctly", () => {
+  const result = calculatePurchaseCosts(1000000, 1000000, 0, { ...settings, pcc: false });
   assert.equal(result.amounts.mortgageFee, 0);
-  assert.equal(result.total, 40400);
-  assert.equal(result.upfront, 1040400);
-  assert.equal(calculatePurchaseCosts(123456.78, 0, 123456.78, settings).amounts.agent, 3703.7);
+  assert.equal(result.total, 37250);
+  assert.equal(result.upfront, 1037250);
+  const small = calculatePurchaseCosts(123456.78, 0, 123456.78, settings);
+  assert.equal(small.amounts.agent, 3703.7);
+  assert.equal(small.agentVatIncluded, 692.56);
 });

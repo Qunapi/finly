@@ -23,16 +23,10 @@ export const defaultCalculatorState: CalculatorState = {
   amount: 15000,
   purchaseCosts: {
     agent: true,
-    agentVat: true,
+
     pcc: true,
-    notary: true,
-    inspection: true,
-    valuation: true,
+    fixedFees: true,
     mortgageFee: true,
-    notaryAmount: 5000,
-    inspectionAmount: 1500,
-    valuationAmount: 750,
-    mortgageFeePercent: 2,
   },
   youthRelief: true,
   copyrightKup: true,
@@ -71,16 +65,10 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
     tab: (pathname.match(/\/(salary|mortgage)\/?$/)?.[1] ?? params.get("tab")) === "mortgage" ? "mortgage" : "salary",
     purchaseCosts: {
       agent: boolean("feeAgent", true),
-      agentVat: boolean("feeVat", true),
+
       pcc: boolean("feePcc", true),
-      notary: boolean("feeNotary", true),
-      inspection: boolean("feeInspect", true),
-      valuation: boolean("feeValue", true),
+      fixedFees: boolean("feeFixed", true),
       mortgageFee: boolean("feeBank", true),
-      notaryAmount: number("notaryCost", 5000, 0, 6250000),
-      inspectionAmount: number("inspectCost", 1500, 0, 6250000),
-      valuationAmount: number("valueCost", 750, 0, 6250000),
-      mortgageFeePercent: number("bankPercent", 2, 0, 10),
     },
     amount: number("amount", defaultCalculatorState.amount, 0, Number.MAX_SAFE_INTEGER),
     youthRelief: boolean("youth", defaultCalculatorState.youthRelief),
@@ -99,22 +87,27 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
 
 const feeQueryKeys: Record<keyof PurchaseCostSettings, string> = {
   agent: "feeAgent",
-  agentVat: "feeVat",
+
   pcc: "feePcc",
-  notary: "feeNotary",
-  inspection: "feeInspect",
-  valuation: "feeValue",
+  fixedFees: "feeFixed",
   mortgageFee: "feeBank",
-  notaryAmount: "notaryCost",
-  inspectionAmount: "inspectCost",
-  valuationAmount: "valueCost",
-  mortgageFeePercent: "bankPercent",
 };
 
 export function writeCalculatorQuery(search: string, state: CalculatorState): string {
   const params = new URLSearchParams(search);
   params.delete("tab");
-  for (const key of Object.values(feeQueryKeys)) params.delete(key);
+  for (const key of [
+    ...Object.values(feeQueryKeys),
+    "feeNotary",
+    "feeInspect",
+    "feeValue",
+    "feeVat",
+    "notaryCost",
+    "inspectCost",
+    "valueCost",
+    "bankPercent",
+  ])
+    params.delete(key);
   for (const key of [
     "amount",
     "youth",

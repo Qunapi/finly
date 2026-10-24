@@ -1,16 +1,18 @@
 export type PurchaseCostSettings = {
   agent: boolean;
-  agentVat: boolean;
   pcc: boolean;
-  notary: boolean;
-  inspection: boolean;
-  valuation: boolean;
+  fixedFees: boolean;
   mortgageFee: boolean;
-  notaryAmount: number;
-  inspectionAmount: number;
-  valuationAmount: number;
-  mortgageFeePercent: number;
 };
+// Budget estimates for a resale apartment; actual supplier/bank quotes vary.
+export const PURCHASE_COST_ASSUMPTIONS = {
+  agentPercentIncludingVat: 3,
+  vatPercent: 23,
+  notary: 5000,
+  inspection: 1500,
+  valuation: 750,
+  mortgageFeePercent: 2,
+} as const;
 export function calculatePurchaseCosts(
   price: number,
   downPayment: number,
@@ -21,13 +23,18 @@ export function calculatePurchaseCosts(
   const agent = settings.agent ? money(price * 0.03) : 0;
   const amounts = {
     agent,
-    agentVat: settings.agent && settings.agentVat ? money(agent * 0.23) : 0,
     pcc: settings.pcc ? money(price * 0.02) : 0,
-    notary: settings.notary ? money(settings.notaryAmount) : 0,
-    inspection: settings.inspection ? money(settings.inspectionAmount) : 0,
-    valuation: settings.valuation ? money(settings.valuationAmount) : 0,
-    mortgageFee: settings.mortgageFee ? money((loan * settings.mortgageFeePercent) / 100) : 0,
+    fixedFees: settings.fixedFees
+      ? PURCHASE_COST_ASSUMPTIONS.notary + PURCHASE_COST_ASSUMPTIONS.inspection + PURCHASE_COST_ASSUMPTIONS.valuation
+      : 0,
+    mortgageFee: settings.mortgageFee ? money((loan * PURCHASE_COST_ASSUMPTIONS.mortgageFeePercent) / 100) : 0,
   };
   const total = money(Object.values(amounts).reduce((sum, value) => sum + value, 0));
-  return { amounts, total, upfront: money(downPayment + total), purchaseTotal: money(price + total) };
+  return {
+    amounts,
+    agentVatIncluded: money((agent * 23) / 123),
+    total,
+    upfront: money(downPayment + total),
+    purchaseTotal: money(price + total),
+  };
 }

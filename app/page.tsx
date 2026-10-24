@@ -586,7 +586,7 @@ export default function Home() {
             <h2>{t("Koszty zakupu mieszkania")}</h2>
             <p className="salary-assumptions">
               {t(
-                "Szacunek dla rynku wtórnego. Wszystkie koszty włączone domyślnie; odznacz PCC przy zwolnieniu. Opłaty bankowe i kwoty stałe są założeniami do edycji. Koszty płatne z własnych środków, poza kwotą kredytu.",
+                "Szacunek dla rynku wtórnego. Wszystkie koszty włączone domyślnie; odznacz PCC przy zwolnieniu. Stałe założenia budżetowe, nie indywidualna oferta. Koszty płatne z własnych środków, poza kwotą kredytu.",
               )}
             </p>
             <div className="calculator purchase-cost-grid">
@@ -594,15 +594,12 @@ export default function Home() {
                 <legend className="sr-only">{t("Uwzględnione koszty")}</legend>
                 {(
                   [
-                    ["agent", "Pośrednik · 3% ceny", null],
-                    ["agentVat", "VAT · 23% prowizji pośrednika", null],
-                    ["pcc", "PCC · 2% wartości nieruchomości", null],
-                    ["notary", "Notariusz, wypisy i opłaty sądowe", "notaryAmount"],
-                    ["inspection", "Inspekcja techniczna", "inspectionAmount"],
-                    ["valuation", "Wycena bankowa", "valuationAmount"],
-                    ["mortgageFee", "Prowizja banku", "mortgageFeePercent"],
+                    ["agent", "Pośrednik · 3% łącznie, w tym VAT 23%"],
+                    ["pcc", "PCC · 2% wartości nieruchomości"],
+                    ["fixedFees", "Opłaty stałe · 7 250 zł"],
+                    ["mortgageFee", "Prowizja banku · 2% kwoty kredytu"],
                   ] as const
-                ).map(([key, label, field]) => (
+                ).map(([key, label]) => (
                   <div className="purchase-cost-item" key={key}>
                     <label className="check-option" htmlFor={`cost-${key}`}>
                       <input
@@ -616,18 +613,18 @@ export default function Home() {
                       <span>{t(label)}</span>
                       <strong>{exactMoney.format(purchase.amounts[key])}</strong>
                     </label>
-                    {field && (
-                      <fieldset className="purchase-cost-edit" disabled={!purchaseCosts[key]}>
-                        <legend className="sr-only">{t(label)}</legend>
-                        <MoneyInput
-                          id={`cost-${field}`}
-                          label={t(field === "mortgageFeePercent" ? "Procent kwoty kredytu" : "Szacowana opłata")}
-                          value={purchaseCosts[field]}
-                          max={field === "mortgageFeePercent" ? 10 : 6250000}
-                          suffix={field === "mortgageFeePercent" ? "%" : "PLN"}
-                          onChange={(value) => setPurchaseCosts((current) => ({ ...current, [field]: value }))}
-                        />
-                      </fieldset>
+                    {key === "fixedFees" && (
+                      <p className="salary-assumptions">
+                        {t("Notariusz, wypisy i sąd: 5 000 zł; inspekcja: 1 500 zł; wycena: 750 zł. Łącznie 7 250 zł.")}
+                      </p>
+                    )}
+                    {key === "agent" && (
+                      <p className="salary-assumptions">
+                        {t(
+                          "3% zawiera VAT: 2,439% ceny netto + 0,561% ceny VAT. VAT w prowizji: {vat}. Nie doliczamy go ponownie.",
+                          { vat: exactMoney.format(purchase.agentVatIncluded) },
+                        )}
+                      </p>
                     )}
                   </div>
                 ))}

@@ -13,6 +13,31 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Opłaty stałe · 7 250 zł": { en: "Combined fixed fees · 7 250 PLN", ru: "Фиксированные расходы · 7 250 PLN" },
+  "Notariusz, wypisy i sąd: 5 000 zł; inspekcja: 1 500 zł; wycena: 750 zł. Łącznie 7 250 zł.": {
+    en: "Notary, copies and court: 5 000 PLN; inspection: 1 500 PLN; valuation: 750 PLN. Total: 7 250 PLN.",
+    ru: "Нотариус, копии и суд: 5 000 PLN; проверка: 1 500 PLN; оценка: 750 PLN. Всего 7 250 PLN.",
+  },
+  "Pośrednik · 3% łącznie, w tym VAT 23%": {
+    en: "Agent · 3% total, including 23% VAT",
+    ru: "Агент · 3% всего, включая НДС 23%",
+  },
+  "Notariusz, wypisy i sąd · 5 000 zł": {
+    en: "Notary, deed copies and court · 5 000 PLN",
+    ru: "Нотариус, копии и суд · 5 000 PLN",
+  },
+  "Inspekcja techniczna · 1 500 zł": { en: "Technical inspection · 1 500 PLN", ru: "Техническая проверка · 1 500 PLN" },
+  "Wycena bankowa · 750 zł": { en: "Bank valuation · 750 PLN", ru: "Оценка для банка · 750 PLN" },
+  "Prowizja banku · 2% kwoty kredytu": { en: "Bank commission · 2% of loan", ru: "Комиссия банка · 2% кредита" },
+  "3% zawiera VAT: 2,439% ceny netto + 0,561% ceny VAT. VAT w prowizji: {vat}. Nie doliczamy go ponownie.": {
+    en: "The 3% includes VAT: 2.439% of the price net + 0.561% VAT. VAT included in the fee: {vat}. It is not added again.",
+    ru: "В 3% уже включён НДС: 2,439% стоимости нетто + 0,561% НДС. НДС в комиссии: {vat}. Повторно не начисляется.",
+  },
+  "Szacunek dla rynku wtórnego. Wszystkie koszty włączone domyślnie; odznacz PCC przy zwolnieniu. Stałe założenia budżetowe, nie indywidualna oferta. Koszty płatne z własnych środków, poza kwotą kredytu.":
+    {
+      en: "Resale-market estimate. All costs are enabled by default; untick PCC if exempt. Fixed budgeting assumptions, not an individual quote. Costs are paid upfront, separately from the loan.",
+      ru: "Оценка для вторичного рынка. Все расходы включены по умолчанию; отключите PCC при освобождении. Фиксированные ориентиры для бюджета, не индивидуальное предложение. Расходы оплачиваются своими средствами сверх кредита.",
+    },
   "Koszty zakupu mieszkania": { en: "Apartment purchase costs", ru: "Расходы на покупку квартиры" },
   "Szacunek dla rynku wtórnego. Wszystkie koszty włączone domyślnie; odznacz PCC przy zwolnieniu. Opłaty bankowe i kwoty stałe są założeniami do edycji. Koszty płatne z własnych środków, poza kwotą kredytu.":
     {
