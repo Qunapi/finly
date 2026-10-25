@@ -574,3 +574,14 @@ footer {
     grid-template-columns: 1fr;
   }
 }
+.salary-schedule tfoot {
+  background: #f3f0fc;
+  font-weight: 700;
+}
+.salary-schedule tfoot th {
+  white-space: normal;
+  text-align: left;
+}
+.salary-schedule h3 {
+  margin-top: 28px;
+}

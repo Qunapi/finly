@@ -22,7 +22,13 @@ export function annualIncomeTax(taxableIncome: number) {
   );
 }
 
-export function calculateAnnualSalary(annualAmount: number, youthRelief: boolean, copyrightKup: boolean, ppk = true) {
+function calculateSalaryEstimate(
+  annualAmount: number,
+  youthRelief: boolean,
+  copyrightKup: boolean,
+  ppk: boolean,
+  withMonthlySchedule: boolean,
+) {
   const rules = SALARY_RULES_2026;
   const annualGross = money(Math.max(0, Number.isFinite(annualAmount) ? annualAmount : 0));
   const annualCents = Math.round(annualGross * 100);
@@ -65,6 +71,9 @@ export function calculateAnnualSalary(annualAmount: number, youthRelief: boolean
       employerPpk,
       exemptIncome: exempt,
       pensionBase,
+      taxableIncome: money(income - exempt),
+      deductibleSocial,
+      copyrightIncome: Math.max(0, gross * taxableRatio - deductibleSocial),
     });
   }
   const taxableIncome = Math.max(0, annualGross + annualEmployerPpk - exemptIncome);
@@ -88,6 +97,70 @@ export function calculateAnnualSalary(annualAmount: number, youthRelief: boolean
   const annualB2bTaxBase = Math.round(Math.max(0, annualGross - annualB2bDeductibleSocial - annualB2bHealth * 0.5));
   const annualB2bTax = Math.round(annualB2bTaxBase * 0.12);
   const annualB2bNet = money(annualGross - annualB2bSocial - annualB2bHealth - annualB2bTax);
+  let copyrightIncomeUsed = 0;
+  let copyrightCostsUsed = 0;
+  let cumulativeTaxBase = 0;
+  let annualTaxAdvances = 0;
+  let annualUopPaid = 0;
+  let cumulativeB2bRevenue = 0;
+  let cumulativeB2bSocial = 0;
+  let annualB2bHealthPaid = 0;
+  let annualB2bTaxPaid = 0;
+  let annualB2bPaid = 0;
+  const salaryMonths = withMonthlySchedule
+    ? months.map((row) => {
+        copyrightIncomeUsed += row.copyrightIncome;
+        const copyrightTarget = Math.min(annualCopyrightCosts, money(copyrightIncomeUsed * 0.5));
+        const costs = copyrightKup
+          ? money(copyrightTarget - copyrightCostsUsed)
+          : Math.min(250, money(Math.max(0, row.taxableIncome - row.deductibleSocial)));
+        copyrightCostsUsed = copyrightTarget;
+        const taxBase = Math.max(0, Math.round(row.taxableIncome - row.deductibleSocial - costs));
+        const baseAt12 = Math.min(taxBase, Math.max(0, rules.taxThreshold - cumulativeTaxBase));
+        const baseAt32 = taxBase - baseAt12;
+        cumulativeTaxBase += taxBase;
+        // One employer, PIT-2 filed: use a 300 PLN reduction each month, not
+        // an accumulated 30000 PLN annual allowance deferred until later months.
+        const taxAdvance = Math.round(Math.max(0, baseAt12 * 0.12 + baseAt32 * 0.32 - rules.taxReduction / 12));
+        const uopNet = money(row.gross - row.social - row.health - row.employeePpk - taxAdvance);
+        annualTaxAdvances += taxAdvance;
+        annualUopPaid = money(annualUopPaid + uopNet);
+
+        cumulativeB2bRevenue = money(cumulativeB2bRevenue + row.gross);
+        cumulativeB2bSocial = money(cumulativeB2bSocial + rules.b2bDeductibleSocialMonthly);
+        const b2bHealthRevenue = Math.max(0, money(cumulativeB2bRevenue - cumulativeB2bSocial));
+        const b2bHealthTier = b2bHealthRevenue <= 60000 ? 0 : b2bHealthRevenue <= 300000 ? 1 : 2;
+        const b2bHealth = rules.b2bHealthMonthly[b2bHealthTier];
+        annualB2bHealthPaid = money(annualB2bHealthPaid + b2bHealth);
+        const b2bTaxBase = Math.round(
+          Math.max(0, cumulativeB2bRevenue - cumulativeB2bSocial - annualB2bHealthPaid * 0.5),
+        );
+        const cumulativeB2bTax = Math.round(b2bTaxBase * 0.12);
+        const b2bTax = Math.max(0, cumulativeB2bTax - annualB2bTaxPaid);
+        annualB2bTaxPaid += b2bTax;
+        const b2bSocial = money(rules.b2bDeductibleSocialMonthly + rules.b2bLabourFundMonthly);
+        const b2bNet = money(row.gross - b2bSocial - b2bHealth - b2bTax);
+        annualB2bPaid = money(annualB2bPaid + b2bNet);
+        return {
+          ...row,
+          costs,
+          taxBase,
+          cumulativeTaxBase,
+          baseAt12,
+          baseAt32,
+          taxAdvance,
+          uopNet,
+          b2bSocial,
+          b2bHealth,
+          b2bHealthRevenue,
+          b2bHealthTier,
+          b2bTax,
+          b2bNet,
+        };
+      })
+    : [];
+  const uopSettlement = money(annualUopNet - annualUopPaid);
+  const b2bSettlement = money(annualB2bNet - annualB2bPaid);
   return {
     annualGross,
     annualUopNet,
@@ -108,7 +181,14 @@ export function calculateAnnualSalary(annualAmount: number, youthRelief: boolean
     annualB2bTaxBase,
     healthRevenue,
     healthTier,
-    months,
+    months: salaryMonths,
+    annualTaxAdvances,
+    annualUopPaid,
+    uopSettlement,
+    annualB2bHealthPaid,
+    annualB2bTaxPaid,
+    annualB2bPaid,
+    b2bSettlement,
     uopNet: annualUopNet / 12,
     b2bNet: annualB2bNet / 12,
     employeeSocial: annualEmployeeSocial / 12,
@@ -120,6 +200,10 @@ export function calculateAnnualSalary(annualAmount: number, youthRelief: boolean
     b2bHealth: annualB2bHealth / 12,
     b2bTax: annualB2bTax / 12,
   };
+}
+
+export function calculateAnnualSalary(annualAmount: number, youthRelief: boolean, copyrightKup: boolean, ppk = true) {
+  return calculateSalaryEstimate(annualAmount, youthRelief, copyrightKup, ppk, true);
 }
 
 export function calculateSalary(amount: number, youthRelief: boolean, copyrightKup: boolean, ppk = true) {
@@ -153,14 +237,14 @@ export function findEquivalentAmount(
     let high = end;
     for (let i = 0; i < 60; i++) {
       const middle = (low + high) / 2;
-      const result = calculateSalary(middle, youthRelief, copyrightKup, ppk);
+      const result = calculateSalaryEstimate(middle * 12, youthRelief, copyrightKup, ppk, false);
       const net = contract === "uop" ? result.uopNet : result.b2bNet;
       if (net < targetNet) low = middle;
       else high = middle;
     }
 
     for (const amount of [start, low, high, end]) {
-      const result = calculateSalary(amount, youthRelief, copyrightKup, ppk);
+      const result = calculateSalaryEstimate(amount * 12, youthRelief, copyrightKup, ppk, false);
       const net = contract === "uop" ? result.uopNet : result.b2bNet;
       const difference = Math.abs(net - targetNet);
       if (difference < smallestDifference) {

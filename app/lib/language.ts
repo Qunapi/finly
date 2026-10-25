@@ -13,6 +13,44 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Wynagrodzenie miesiąc po miesiącu": { en: "Salary month by month", ru: "Зарплата по месяцам" },
+  Brutto: { en: "Gross", ru: "Брутто" },
+  "PPK pracodawcy · 1,5%": { en: "Employer PPK · 1.5%", ru: "PPK работодателя · 1,5%" },
+  "Ulga dla młodych w miesiącu": { en: "Youth-exempt income this month", ru: "Доход по льготе до 26 лет за месяц" },
+  "KUP w miesiącu": { en: "Deductible costs this month", ru: "Вычет расходов за месяц" },
+  "Podstawa PIT": { en: "Income tax base", ru: "Налоговая база" },
+  "Podstawa PIT narastająco": { en: "Year-to-date tax base", ru: "Налоговая база с начала года" },
+  "Stawka PIT": { en: "Income tax rate", ru: "Ставка налога" },
+  "Na rękę": { en: "Take-home", ru: "На руки" },
+  Zwolnienie: { en: "Exempt", ru: "Освобождение" },
+  "Suma wypłat w roku": { en: "Total paid during year", ru: "Сумма выплат за год" },
+  "Korekta po rozliczeniu rocznym (+ zwrot / − dopłata)": {
+    en: "Annual settlement adjustment (+ refund / − payment due)",
+    ru: "Годовой перерасчёт (+ возврат / − доплата)",
+  },
+  "Na rękę / rok po rozliczeniu": { en: "Annual take-home after settlement", ru: "На руки за год после перерасчёта" },
+  "Miesięczne wynagrodzenie UoP": { en: "Monthly employment pay", ru: "Зарплата по трудовому договору по месяцам" },
+  "Miesięczny dochód B2B": { en: "Monthly B2B income", ru: "Доход B2B по месяцам" },
+  "Przychód bez VAT": { en: "Revenue excluding VAT", ru: "Выручка без НДС" },
+  "Przychód do progu zdrowotnego narastająco": {
+    en: "Year-to-date health bracket revenue",
+    ru: "Доход для порога медвзноса с начала года",
+  },
+  "UoP: ulga do 26 lat kończy się po 85 528 zł przychodu; później PIT 12%, a powyżej 120 000 zł podstawy PIT narastająco — 32%. 50% KUP działa tylko do limitu. PPK i limit składek są uwzględniane w każdym miesiącu. Zakładamy PIT-2 (300 zł miesięcznie), jednego pracodawcę i prawo do wybranych ulg przez cały rok.":
+    {
+      en: "Employment: the under-26 exemption covers the first 85 528 PLN of income; taxable income then falls under 12%, and 32% above a year-to-date tax base of 120 000 PLN. The 50% copyright deduction stops at its limit. PPK and contribution caps are applied monthly. Assumes PIT-2 (300 PLN/month), one employer and full-year eligibility for selected reliefs.",
+      ru: "Трудовой договор: льгота до 26 лет действует на первые 85 528 PLN дохода; затем облагаемая часть облагается по 12%, а сверх налоговой базы 120 000 PLN с начала года — по 32%. Авторский вычет 50% ограничен лимитом. PPK и лимит взносов учитываются ежемесячно. Предполагается PIT-2 (300 PLN в месяц), один работодатель и право на выбранные льготы весь год.",
+    },
+  "Miesięczne zaliczki mogą różnić się od podatku rocznego przez zaokrąglenia, niewykorzystane miesięczne zmniejszenie podatku i koszty roczne. Korekta wyjaśnia różnicę między sumą wypłat a rocznym wynikiem w karcie.":
+    {
+      en: "Monthly withholding can differ from annual tax due to rounding, unused monthly tax credits and annual deductions. The adjustment reconciles monthly payments with the annual total in the card.",
+      ru: "Месячные авансы могут отличаться от годового налога из-за округлений, неиспользованного уменьшения налога и годовых вычетов. Корректировка согласует сумму выплат с годовым итогом в карточке.",
+    },
+  "B2B: stawka podatku zawsze 12%; ulga do 26 lat, KUP i PPK nie dotyczą B2B. Składka zdrowotna zmienia się po przekroczeniu progów przychodu pomniejszonego o składki społeczne. Roczna korekta obejmuje szacowane wyrównanie zdrowotne i podatkowe; rzeczywiste terminy płatności i odliczeń mogą się różnić.":
+    {
+      en: "B2B: income tax remains 12%; youth relief, employment deductions and PPK do not apply. Health contributions change when cumulative revenue after social contributions crosses a bracket. The annual adjustment includes an estimated health and tax reconciliation; actual payment and deduction dates can differ.",
+      ru: "B2B: налог всегда 12%; льгота до 26 лет, вычеты трудового договора и PPK не применяются. Медицинские взносы меняются при превышении порогов дохода за вычетом социальных взносов. Годовая корректировка включает оценку перерасчёта взносов и налога; реальные сроки платежей и вычетов могут отличаться.",
+    },
   "Rezerwa awaryjna · 100 000 zł": {
     en: "Emergency reserve · 100 000 PLN",
     ru: "Резерв на непредвиденные расходы · 100 000 PLN",

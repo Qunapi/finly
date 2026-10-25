@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SalarySchedule from "./components/salary-schedule";
 import { queueUrlUpdate } from "./lib/url-updates";
 import { useLanguage } from "./components/language-provider";
 import { numberFormat, parseNumberInput } from "./lib/number-format";
@@ -408,6 +409,7 @@ export default function Home() {
               </article>
             </div>
           </section>
+          <SalarySchedule result={result} />
           <p className="salary-assumptions">
             {t(
               "UoP: PIT 12%/32%, próg 120 000 zł, kwota wolna 30 000 zł, ulga dla młodych do 85 528 zł, limit składek emerytalno-rentowych 282 600 zł. Bez 50% KUP: koszty 3 000 zł rocznie. B2B: pełny rok działalności, standardowy ZUS, bez chorobowego i kosztów; składka zdrowotna po rozliczeniu rocznym. Założenia na 2026 r.; inne dochody i ulgi nie są uwzględniane.",
