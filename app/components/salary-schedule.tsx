@@ -108,6 +108,11 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
               <td>{money.format(result.annualUopNet)}</td>
               <td colSpan={11} />
             </tr>
+            <tr>
+              <th scope="row">{t("Średnio na rękę / miesiąc")}</th>
+              <td>{money.format(result.annualUopNet / 12)}</td>
+              <td colSpan={11} />
+            </tr>
           </tfoot>
         </table>
       </div>
@@ -155,6 +160,11 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
             <tr>
               <th scope="row">{t("Na rękę / rok po rozliczeniu")}</th>
               <td>{money.format(result.annualB2bNet)}</td>
+              <td colSpan={5} />
+            </tr>
+            <tr>
+              <th scope="row">{t("Średnio na rękę / miesiąc")}</th>
+              <td>{money.format(result.annualB2bNet / 12)}</td>
               <td colSpan={5} />
             </tr>
           </tfoot>
