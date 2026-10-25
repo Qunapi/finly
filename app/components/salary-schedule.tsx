@@ -11,6 +11,7 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
   const sum = (key: keyof SalaryResult["months"][number]) =>
     result.months.reduce((total, row) => total + Number(row[key]), 0);
   const uopKeys = [
+    "uopNet",
     "gross",
     "social",
     "health",
@@ -22,6 +23,7 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
     "cumulativeTaxBase",
   ] as const;
   const uopLabels = [
+    "Na rękę",
     "Brutto",
     "Składki społeczne",
     "Składka zdrowotna",
@@ -32,14 +34,14 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
     "Podstawa PIT",
     "Podstawa PIT narastająco",
   ];
-  const b2bKeys = ["gross", "b2bSocial", "b2bHealth", "b2bHealthRevenue", "b2bTax", "b2bNet"] as const;
+  const b2bKeys = ["b2bNet", "gross", "b2bSocial", "b2bHealth", "b2bHealthRevenue", "b2bTax"] as const;
   const b2bLabels = [
+    "Na rękę",
     "Przychód bez VAT",
     "ZUS społeczny · bez chorobowego",
     "Składka zdrowotna",
     "Przychód do progu zdrowotnego narastająco",
     "Ryczałt 12%",
-    "Na rękę",
   ];
   return (
     <section className="payment-schedule salary-schedule" aria-label={t("Wynagrodzenie miesiąc po miesiącu")}>
@@ -63,7 +65,6 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
               ))}
               <th scope="col">{t("Stawka PIT")}</th>
               <th scope="col">{t("Zaliczka na PIT")}</th>
-              <th scope="col">{t("Na rękę")}</th>
             </tr>
           </thead>
           <tbody>
@@ -85,7 +86,6 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
                           : "—"}
                 </td>
                 <td>{money.format(row.taxAdvance)}</td>
-                <td>{money.format(row.uopNet)}</td>
               </tr>
             ))}
           </tbody>
@@ -97,19 +97,16 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
               ))}
               <td>—</td>
               <td>{money.format(result.annualTaxAdvances)}</td>
-              <td>{money.format(result.annualUopPaid)}</td>
             </tr>
             <tr>
-              <th scope="row" colSpan={12}>
-                {t("Korekta po rozliczeniu rocznym (+ zwrot / − dopłata)")}
-              </th>
+              <th scope="row">{t("Korekta po rozliczeniu rocznym (+ zwrot / − dopłata)")}</th>
               <td>{money.format(result.uopSettlement)}</td>
+              <td colSpan={11} />
             </tr>
             <tr>
-              <th scope="row" colSpan={12}>
-                {t("Na rękę / rok po rozliczeniu")}
-              </th>
+              <th scope="row">{t("Na rękę / rok po rozliczeniu")}</th>
               <td>{money.format(result.annualUopNet)}</td>
+              <td colSpan={11} />
             </tr>
           </tfoot>
         </table>
@@ -151,16 +148,14 @@ export default function SalarySchedule({ result }: { result: SalaryResult }) {
               ))}
             </tr>
             <tr>
-              <th scope="row" colSpan={6}>
-                {t("Korekta po rozliczeniu rocznym (+ zwrot / − dopłata)")}
-              </th>
+              <th scope="row">{t("Korekta po rozliczeniu rocznym (+ zwrot / − dopłata)")}</th>
               <td>{money.format(result.b2bSettlement)}</td>
+              <td colSpan={5} />
             </tr>
             <tr>
-              <th scope="row" colSpan={6}>
-                {t("Na rękę / rok po rozliczeniu")}
-              </th>
+              <th scope="row">{t("Na rękę / rok po rozliczeniu")}</th>
               <td>{money.format(result.annualB2bNet)}</td>
+              <td colSpan={5} />
             </tr>
           </tfoot>
         </table>
