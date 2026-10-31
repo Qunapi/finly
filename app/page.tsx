@@ -448,6 +448,18 @@ export default function Home() {
                   </button>
                 ))}
               </div>
+              <div className="quick-amounts annual-adjustments" aria-label={t("Zmień cenę mieszkania")}>
+                {[-100000, 100000].map((change) => (
+                  <button
+                    key={change}
+                    type="button"
+                    disabled={change < 0 ? propertyPrice <= 0 : propertyPrice >= 6250000}
+                    onClick={() => setPropertyPrice((current) => Math.min(6250000, Math.max(0, current + change)))}
+                  >
+                    {change < 0 ? "−100k" : "+100k"}
+                  </button>
+                ))}
+              </div>
               <MoneyInput
                 id="down-payment"
                 label={t("Wkład własny")}

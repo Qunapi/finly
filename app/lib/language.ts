@@ -13,6 +13,7 @@ export function chooseLanguage(query: string | null, saved: string | null, prefe
 }
 
 const translations: Record<string, { en: string; ru: string }> = {
+  "Zmień cenę mieszkania": { en: "Adjust apartment price", ru: "Изменить стоимость квартиры" },
   "Wynagrodzenie miesiąc po miesiącu": { en: "Salary month by month", ru: "Зарплата по месяцам" },
   Brutto: { en: "Gross", ru: "Брутто" },
   "PPK pracodawcy · 1,5%": { en: "Employer PPK · 1.5%", ru: "PPK работодателя · 1,5%" },
