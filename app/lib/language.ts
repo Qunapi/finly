@@ -55,10 +55,10 @@ const translations: Record<string, { en: string; ru: string }> = {
   Usuń: { en: "Delete", ru: "Удалить" },
   "Kopiuj link": { en: "Copy link", ru: "Копировать ссылку" },
   Skopiowano: { en: "Copied", ru: "Скопировано" },
-  "Lista jest zapisana w adresie strony. Udostępniony link to kopia rozliczenia, bez wspólnej edycji na żywo. Używaj pseudonimów zamiast danych wrażliwych.":
+  "Lista jest zapisana w adresie strony i lokalnie w tej przeglądarce. Udostępniony link to kopia rozliczenia, bez wspólnej edycji na żywo. Używaj pseudonimów zamiast danych wrażliwych.":
     {
-      en: "The list is saved in the page address. A shared link is a snapshot, without live collaboration. Use nicknames instead of sensitive details.",
-      ru: "Список сохранён в адресе страницы. Ссылка содержит копию расчёта без совместного редактирования в реальном времени. Используйте псевдонимы вместо конфиденциальных данных.",
+      en: "The list is saved in the page address and locally in this browser. A shared link is a snapshot, without live collaboration. Use nicknames instead of sensitive details.",
+      ru: "Список сохранён в адресе страницы и локально в этом браузере. Ссылка содержит копию расчёта без совместного редактирования в реальном времени. Используйте псевдонимы вместо конфиденциальных данных.",
     },
   "Zmień cenę mieszkania": { en: "Adjust apartment price", ru: "Изменить стоимость квартиры" },
   "Wynagrodzenie miesiąc po miesiącu": { en: "Salary month by month", ru: "Зарплата по месяцам" },

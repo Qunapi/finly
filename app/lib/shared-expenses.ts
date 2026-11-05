@@ -78,3 +78,24 @@ export function settleExpenses(data: SharedExpenses) {
   }
   return { balances, transfers, total: data.expenses.reduce((sum, e) => sum + e.cents, 0) };
 }
+
+export const sharedExpensesStorageKey = "finly-shared-expenses";
+
+export function restoreSharedExpenses(search: string, storage: () => Pick<Storage, "getItem">): SharedExpenses {
+  const params = new URLSearchParams(search);
+  // An explicit URL snapshot, including an empty one, overrides saved data.
+  if (params.has("bills")) return parseSharedExpenses(params.get("bills"));
+  try {
+    return parseSharedExpenses(storage().getItem(sharedExpensesStorageKey));
+  } catch {
+    return emptySharedExpenses;
+  }
+}
+
+export function saveSharedExpenses(data: SharedExpenses, storage: () => Pick<Storage, "setItem">): void {
+  try {
+    storage().setItem(sharedExpensesStorageKey, JSON.stringify(data));
+  } catch {
+    // Private browsing, blocked storage, or quota errors must not interrupt editing.
+  }
+}

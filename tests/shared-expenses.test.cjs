@@ -101,3 +101,54 @@ test("deleting and editing an expense recomputes balances without stale debt", (
     [0, 0, 0],
   );
 });
+
+test("local storage restores saved expenses while URL snapshots take priority", () => {
+  const { restoreSharedExpenses, saveSharedExpenses, sharedExpensesStorageKey } = queryModule.exports;
+  const data = { people, expenses: [expense("a", 10000, "0", ["0", "1"])] };
+  const values = new Map();
+  const storage = () => ({
+    getItem: (key) => values.get(key) ?? null,
+    setItem: (key, value) => values.set(key, value),
+  });
+  saveSharedExpenses(data, storage);
+  assert.deepEqual(JSON.parse(values.get(sharedExpensesStorageKey)), data);
+  assert.deepEqual(restoreSharedExpenses("?lang=en", storage), data);
+  const shared = { people: [people[1]], expenses: [] };
+  assert.deepEqual(
+    restoreSharedExpenses("?" + new URLSearchParams({ bills: JSON.stringify(shared) }), storage),
+    shared,
+  );
+  assert.deepEqual(
+    restoreSharedExpenses("?bills=" + encodeURIComponent(JSON.stringify(emptySharedExpenses)), storage),
+    emptySharedExpenses,
+  );
+  assert.deepEqual(restoreSharedExpenses("?bills=invalid", storage), emptySharedExpenses);
+  saveSharedExpenses(emptySharedExpenses, storage);
+  assert.deepEqual(restoreSharedExpenses("", storage), emptySharedExpenses);
+});
+
+test("missing, corrupt, blocked and full local storage never breaks shared expenses", () => {
+  const { restoreSharedExpenses, saveSharedExpenses } = queryModule.exports;
+  for (const storage of [
+    () => ({ getItem: () => null }),
+    () => ({ getItem: () => "broken" }),
+    () => {
+      throw new Error("SecurityError");
+    },
+  ]) {
+    assert.deepEqual(restoreSharedExpenses("", storage), emptySharedExpenses);
+  }
+  const blocked = () => {
+    throw new Error("SecurityError");
+  };
+  assert.doesNotThrow(() => saveSharedExpenses(emptySharedExpenses, blocked));
+  assert.doesNotThrow(() =>
+    saveSharedExpenses(emptySharedExpenses, () => ({
+      setItem: () => {
+        throw new Error("QuotaExceededError");
+      },
+    })),
+  );
+  const data = { people, expenses: [] };
+  assert.deepEqual(restoreSharedExpenses("?" + new URLSearchParams({ bills: JSON.stringify(data) }), blocked), data);
+});

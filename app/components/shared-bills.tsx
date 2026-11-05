@@ -282,7 +282,7 @@ export default function SharedBills({
         )}
         <p className="salary-assumptions">
           {t(
-            "Lista jest zapisana w adresie strony. Udostępniony link to kopia rozliczenia, bez wspólnej edycji na żywo. Używaj pseudonimów zamiast danych wrażliwych.",
+            "Lista jest zapisana w adresie strony i lokalnie w tej przeglądarce. Udostępniony link to kopia rozliczenia, bez wspólnej edycji na żywo. Używaj pseudonimów zamiast danych wrażliwych.",
           )}
         </p>
         <button

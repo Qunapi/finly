@@ -5,7 +5,7 @@ Financial calculators for Poland: compare employment and B2B income, estimate mo
 - [Open Finly](https://qunapi.github.io/finly/)
 - [GitHub Actions — deployment status and logs](https://github.com/Qunapi/finly/actions/workflows/deploy.yml)
 
-Shared expenses support people, PLN payments, equal splits among selected participants, and suggested repayments. The page URL stores a snapshot that can be shared; it does not provide live collaboration.
+Shared expenses support people, PLN payments, equal splits among selected participants, and suggested repayments. Expenses are saved locally in the browser and in the page URL. A shared URL overrides the locally saved list; it does not provide live collaboration.
 
 ## Development
 

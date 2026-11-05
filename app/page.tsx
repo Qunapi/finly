@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import SharedBills from "./components/shared-bills";
-import { emptySharedExpenses, parseSharedExpenses } from "./lib/shared-expenses";
+import { emptySharedExpenses, restoreSharedExpenses, saveSharedExpenses } from "./lib/shared-expenses";
 import SalarySchedule from "./components/salary-schedule";
 import { queueUrlUpdate } from "./lib/url-updates";
 import { useLanguage } from "./components/language-provider";
@@ -99,7 +99,7 @@ export default function Home() {
   useEffect(() => {
     const state = parseCalculatorQuery(window.location.search, window.location.pathname);
     setTab(state.tab);
-    setSharedExpenses(parseSharedExpenses(new URLSearchParams(window.location.search).get("bills")));
+    setSharedExpenses(restoreSharedExpenses(window.location.search, () => localStorage));
     setAmount(state.amount);
     setYouthRelief(state.youthRelief);
     setCopyrightKup(state.copyrightKup);
@@ -114,6 +114,10 @@ export default function Home() {
     setOverpaymentMode(state.overpaymentMode);
     setQueryLoaded(true);
   }, []);
+
+  useEffect(() => {
+    if (queryLoaded) saveSharedExpenses(sharedExpenses, () => localStorage);
+  }, [queryLoaded, sharedExpenses]);
 
   useEffect(() => {
     if (!queryLoaded) return;
