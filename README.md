@@ -1,9 +1,11 @@
 # Finly
 
-Financial calculators for Poland: compare employment and B2B income, or estimate mortgage repayments and apartment purchase costs. Available in Polish, English, and Russian, with shareable calculator settings.
+Financial calculators for Poland: compare employment and B2B income, estimate mortgage repayments and apartment purchase costs, or split shared travel expenses. Available in Polish, English, and Russian, with shareable calculator settings.
 
 - [Open Finly](https://qunapi.github.io/finly/)
 - [GitHub Actions — deployment status and logs](https://github.com/Qunapi/finly/actions/workflows/deploy.yml)
+
+Shared expenses support people, PLN payments, equal splits among selected participants, and suggested repayments. The page URL stores a snapshot that can be shared; it does not provide live collaboration.
 
 ## Development
 

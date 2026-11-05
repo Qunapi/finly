@@ -588,3 +588,114 @@ footer {
 .salary-schedule tfoot th {
   max-width: 160px;
 }
+
+.tabs {
+  flex-wrap: wrap;
+}
+.bills-card {
+  background: var(--white, #fff);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: clamp(20px, 4vw, 36px);
+  margin: 24px 0;
+  min-width: 0;
+}
+.bills-card h2 {
+  margin-top: 0;
+}
+.bills-card input:not([type="checkbox"]),
+.bills-card select {
+  width: 100%;
+  min-width: 0;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 12px;
+  background: #fff;
+  color: var(--ink);
+  font: inherit;
+}
+.bills-card button {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #f5f1fc;
+  color: var(--purple);
+  padding: 10px 16px;
+  font: inherit;
+  cursor: pointer;
+}
+.bills-card button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+.bills-inline,
+.bills-form {
+  display: grid;
+  gap: 12px;
+  max-width: 560px;
+}
+.bills-form fieldset {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+  min-width: 0;
+}
+.bills-check {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  padding: 8px 0;
+  overflow-wrap: anywhere;
+}
+.bills-check input {
+  accent-color: var(--purple);
+  width: 18px;
+  height: 18px;
+}
+.bills-people,
+.bills-expenses,
+.bills-transfers {
+  padding: 0;
+  list-style: none;
+}
+.bills-people {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.bills-people li {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 8px 12px;
+  overflow-wrap: anywhere;
+  max-width: 100%;
+}
+.bills-people li span {
+  min-width: 0;
+}
+.bills-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+.bills-expenses li {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--line);
+  overflow-wrap: anywhere;
+}
+.bills-expenses li > div {
+  min-width: 0;
+}
+.bills-transfers li {
+  padding: 12px 0;
+  overflow-wrap: anywhere;
+}
+.bills-card p {
+  overflow-wrap: anywhere;
+}

@@ -2,7 +2,7 @@ import type { PurchaseCostSettings } from "./purchase-costs";
 import type { OverpaymentMode } from "./mortgage";
 
 export type CalculatorState = {
-  tab: "salary" | "mortgage";
+  tab: "salary" | "mortgage" | "expenses";
   amount: number;
   purchaseCosts: PurchaseCostSettings;
   youthRelief: boolean;
@@ -62,7 +62,10 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
   const downPaymentPercent = number("down", defaultCalculatorState.downPaymentPercent, 0, 100);
 
   return {
-    tab: (pathname.match(/\/(salary|mortgage)\/?$/)?.[1] ?? params.get("tab")) === "mortgage" ? "mortgage" : "salary",
+    tab: (() => {
+      const tab = pathname.match(/\/(salary|mortgage|expenses)\/?$/)?.[1] ?? params.get("tab");
+      return tab === "mortgage" || tab === "expenses" ? tab : "salary";
+    })(),
     purchaseCosts: {
       agent: boolean("feeAgent", true),
 
@@ -129,7 +132,7 @@ export function writeCalculatorQuery(search: string, state: CalculatorState): st
     params.set("youth", state.youthRelief ? "1" : "0");
     params.set("kup", state.copyrightKup ? "1" : "0");
     params.set("ppk", state.ppk ? "1" : "0");
-  } else {
+  } else if (state.tab === "mortgage") {
     params.set("price", String(state.propertyPrice));
     params.set("down", String(state.downPaymentPercent));
     params.set("rate", String(state.rate));
@@ -147,6 +150,6 @@ export function writeCalculatorQuery(search: string, state: CalculatorState): st
 }
 
 export function writeCalculatorPath(pathname: string, tab: CalculatorState["tab"]): string {
-  const base = pathname.replace(/\/(salary|mortgage)\/?$/, "").replace(/\/$/, "");
+  const base = pathname.replace(/\/(salary|mortgage|expenses)\/?$/, "").replace(/\/$/, "");
   return `${base}/${tab}`;
 }

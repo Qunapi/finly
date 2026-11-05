@@ -199,3 +199,20 @@ test("emergency reserve defaults off and survives shared mortgage URLs when enab
   const salary = writeCalculatorQuery(query, { ...state, tab: "salary" });
   assert.equal(new URLSearchParams(salary).has("emergency"), false);
 });
+
+test("shared expenses tab has its own route and keeps bills and language", () => {
+  const { parseCalculatorQuery, writeCalculatorQuery, writeCalculatorPath } = queryModule.exports;
+  const state = parseCalculatorQuery("?tab=expenses");
+  assert.equal(state.tab, "expenses");
+  assert.equal(parseCalculatorQuery("", "/finly/expenses/").tab, "expenses");
+  assert.equal(writeCalculatorPath("/finly/mortgage", "expenses"), "/finly/expenses");
+  assert.equal(writeCalculatorPath("/finly/expenses", "salary"), "/finly/salary");
+  const params = new URLSearchParams(
+    writeCalculatorQuery("?bills=test&lang=en&price=100&amount=200&campaign=trip", state),
+  );
+  assert.equal(params.get("bills"), "test");
+  assert.equal(params.get("lang"), "en");
+  assert.equal(params.get("campaign"), "trip");
+  assert.equal(params.has("price"), false);
+  assert.equal(params.has("amount"), false);
+});

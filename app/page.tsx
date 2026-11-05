@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import SharedBills from "./components/shared-bills";
+import { emptySharedExpenses, parseSharedExpenses } from "./lib/shared-expenses";
 import SalarySchedule from "./components/salary-schedule";
 import { queueUrlUpdate } from "./lib/url-updates";
 import { useLanguage } from "./components/language-provider";
@@ -42,7 +44,8 @@ const euros = new Intl.NumberFormat("pl-PL", {
 const quickAmounts = [20000, 25000, 30000, 40000, 50000, 60000];
 export default function Home() {
   const { t, language, ready: languageReady, setLanguage } = useLanguage();
-  const [tab, setTab] = useState<"salary" | "mortgage">("salary");
+  const [tab, setTab] = useState<"salary" | "mortgage" | "expenses">("salary");
+  const [sharedExpenses, setSharedExpenses] = useState(emptySharedExpenses);
   const [amount, setAmount] = useState(15000);
   const [youthRelief, setYouthRelief] = useState(true);
   const [ppk, setPpk] = useState(true);
@@ -96,6 +99,7 @@ export default function Home() {
   useEffect(() => {
     const state = parseCalculatorQuery(window.location.search, window.location.pathname);
     setTab(state.tab);
+    setSharedExpenses(parseSharedExpenses(new URLSearchParams(window.location.search).get("bills")));
     setAmount(state.amount);
     setYouthRelief(state.youthRelief);
     setCopyrightKup(state.copyrightKup);
@@ -114,6 +118,8 @@ export default function Home() {
   useEffect(() => {
     if (!queryLoaded) return;
     queueUrlUpdate("calculator", (url) => {
+      if (sharedExpenses.people.length) url.searchParams.set("bills", JSON.stringify(sharedExpenses));
+      else url.searchParams.delete("bills");
       url.pathname = writeCalculatorPath(url.pathname, tab);
       url.search = writeCalculatorQuery(url.search, {
         tab,
@@ -134,6 +140,7 @@ export default function Home() {
     });
   }, [
     queryLoaded,
+    sharedExpenses,
     tab,
     amount,
     youthRelief,
@@ -219,8 +226,13 @@ export default function Home() {
         <button className={tab === "mortgage" ? "active" : ""} onClick={() => setTab("mortgage")}>
           {t("Kredyt hipoteczny")}
         </button>
+        <button className={tab === "expenses" ? "active" : ""} onClick={() => setTab("expenses")}>
+          {t("Wspólne wydatki")}
+        </button>
       </nav>
-      {tab === "salary" ? (
+      {tab === "expenses" ? (
+        <SharedBills data={sharedExpenses} onChange={setSharedExpenses} />
+      ) : tab === "salary" ? (
         <>
           <section className="intro">
             <p className="eyebrow">{t("KALKULATOR WYNAGRODZEŃ")}</p>
