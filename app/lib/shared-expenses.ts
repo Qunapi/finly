@@ -1,4 +1,5 @@
-import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string";
+import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
+import { decompressFromEncodedURIComponent } from "lz-string";
 
 export type Person = { id: string; name: string };
 export type Expense = { id: string; description: string; cents: number; payer: string; participants: string[] };
@@ -6,13 +7,61 @@ export type SharedExpenses = { people: Person[]; expenses: Expense[] };
 export const emptySharedExpenses: SharedExpenses = { people: [], expenses: [] };
 
 export function encodeSharedExpenses(data: SharedExpenses): string {
-  return "1." + compressToEncodedURIComponent(JSON.stringify(data));
+  const indexes = new Map(data.people.map(({ id }, index) => [id, index]));
+  const people = data.people.map(({ name }) => name);
+  const expenses = data.expenses.map(({ description, cents, payer, participants }) => [
+    description,
+    cents,
+    indexes.get(payer),
+    participants.map((id) => indexes.get(id)),
+  ]);
+  const bytes = deflateSync(strToU8(JSON.stringify([people, expenses])));
+  const binary = bytes.reduce((result, byte) => result + String.fromCharCode(byte), "");
+  return "3." + btoa(binary).replace(/\+/g, "-").replace(/\//g, "_").replace(/=+$/, "");
 }
 
 export function parseSharedExpenses(value: string | null): SharedExpenses {
   try {
-    const json = value?.startsWith("1.") ? decompressFromEncodedURIComponent(value.slice(2)) : value;
-    const data = JSON.parse(json ?? "null");
+    const deflated = value?.startsWith("3.");
+    const compact = deflated || value?.startsWith("2.");
+    let json = value;
+    if (deflated && value) {
+      const binary = atob(value.slice(2).replace(/-/g, "+").replace(/_/g, "/"));
+      // Bound decompression of untrusted links above the largest valid compact snapshot.
+      const limit = 2_000_000;
+      const bytes = inflateSync(
+        Uint8Array.from(binary, (char) => char.charCodeAt(0)),
+        { out: new Uint8Array(limit) },
+      );
+      if (bytes.length >= limit) return emptySharedExpenses;
+      json = strFromU8(bytes);
+    } else if (value && (compact || value.startsWith("1."))) {
+      json = decompressFromEncodedURIComponent(value.slice(2));
+    }
+    let data = JSON.parse(json ?? "null");
+    if (compact) {
+      if (!Array.isArray(data) || data.length !== 2) return emptySharedExpenses;
+      const [names, rows] = data;
+      if (!Array.isArray(names) || names.length > 100 || !Array.isArray(rows) || rows.length > 1000)
+        return emptySharedExpenses;
+      const people = names.map((name, index) => ({ id: String(index), name }));
+      const personId = (index: unknown) =>
+        typeof index === "number" && Number.isInteger(index) ? people[index]?.id : undefined;
+      const expenses = rows.map((row, index) => {
+        if (!Array.isArray(row) || row.length !== 4) throw new Error("Invalid expense row");
+        const [description, cents, payer, participants] = row;
+        if (!Array.isArray(participants) || participants.length > people.length)
+          throw new Error("Invalid participants");
+        return {
+          id: String(index),
+          description,
+          cents,
+          payer: personId(payer),
+          participants: participants.map(personId),
+        };
+      });
+      data = { people, expenses };
+    }
     if (!data || !Array.isArray(data.people) || !Array.isArray(data.expenses)) return emptySharedExpenses;
     const ids = new Set<string>();
     if (data.people.length > 100 || data.expenses.length > 1000) return emptySharedExpenses;

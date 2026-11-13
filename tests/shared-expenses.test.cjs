@@ -164,6 +164,21 @@ test("compressed share links restore Unicode data and reject broken payloads", (
   const storage = () => {
     throw new Error("Shared links don't need storage");
   };
-  assert.deepEqual(restoreSharedExpenses(search, storage), data);
+  assert.deepEqual(restoreSharedExpenses(search, storage), {
+    people: [{ id: "0", name: "Łukasz" }],
+    expenses: [{ ...data.expenses[0], id: "0", payer: "0", participants: ["0"] }],
+  });
+  const { compressToEncodedURIComponent } = require("lz-string");
+  const legacy = new URLSearchParams({ bills: "1." + compressToEncodedURIComponent(JSON.stringify(data)) });
+  assert.deepEqual(restoreSharedExpenses(legacy.toString(), storage), data);
+  assert.match(new URLSearchParams(search).get("bills"), /^3\.[A-Za-z0-9_-]+$/);
+  const compact = [["Łukasz"], [["Śniadanie 🍳", 1234, 0, [0]]]];
+  const legacyCompact = "2." + compressToEncodedURIComponent(JSON.stringify(compact));
+  assert.deepEqual(parseSharedExpenses(legacyCompact), restoreSharedExpenses(search, storage));
+  assert.deepEqual(parseSharedExpenses("3.!"), emptySharedExpenses);
+  const invalid = new URLSearchParams({
+    bills: "2." + compressToEncodedURIComponent(JSON.stringify([["Łukasz"], [["Dinner", 1234, 2, [0]]]])),
+  });
+  assert.deepEqual(restoreSharedExpenses(invalid.toString(), storage), emptySharedExpenses);
   assert.deepEqual(restoreSharedExpenses("bills=1.invalid", storage), emptySharedExpenses);
 });
