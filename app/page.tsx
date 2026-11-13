@@ -2,7 +2,12 @@
 
 import { useEffect, useState } from "react";
 import SharedBills from "./components/shared-bills";
-import { emptySharedExpenses, restoreSharedExpenses, saveSharedExpenses } from "./lib/shared-expenses";
+import {
+  encodeSharedExpenses,
+  emptySharedExpenses,
+  restoreSharedExpenses,
+  saveSharedExpenses,
+} from "./lib/shared-expenses";
 import SalarySchedule from "./components/salary-schedule";
 import { queueUrlUpdate } from "./lib/url-updates";
 import { useLanguage } from "./components/language-provider";
@@ -122,7 +127,7 @@ export default function Home() {
   useEffect(() => {
     if (!queryLoaded) return;
     queueUrlUpdate("calculator", (url) => {
-      if (sharedExpenses.people.length) url.searchParams.set("bills", JSON.stringify(sharedExpenses));
+      if (sharedExpenses.people.length) url.searchParams.set("bills", encodeSharedExpenses(sharedExpenses));
       else url.searchParams.delete("bills");
       url.pathname = writeCalculatorPath(url.pathname, tab);
       url.search = writeCalculatorQuery(url.search, {

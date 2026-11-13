@@ -152,3 +152,18 @@ test("missing, corrupt, blocked and full local storage never breaks shared expen
   const data = { people, expenses: [] };
   assert.deepEqual(restoreSharedExpenses("?" + new URLSearchParams({ bills: JSON.stringify(data) }), blocked), data);
 });
+
+test("compressed share links restore Unicode data and reject broken payloads", () => {
+  const { encodeSharedExpenses, restoreSharedExpenses } = queryModule.exports;
+  const data = {
+    people: [{ id: "p", name: "Łukasz" }],
+    expenses: [{ ...expense("e", 1234, "p", ["p"]), description: "Śniadanie 🍳" }],
+  };
+  const search = new URLSearchParams({ bills: encodeSharedExpenses(data) }).toString();
+  assert.ok(search.length < new URLSearchParams({ bills: JSON.stringify(data) }).toString().length);
+  const storage = () => {
+    throw new Error("Shared links don't need storage");
+  };
+  assert.deepEqual(restoreSharedExpenses(search, storage), data);
+  assert.deepEqual(restoreSharedExpenses("bills=1.invalid", storage), emptySharedExpenses);
+});

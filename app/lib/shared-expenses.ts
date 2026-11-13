@@ -1,11 +1,18 @@
+import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from "lz-string";
+
 export type Person = { id: string; name: string };
 export type Expense = { id: string; description: string; cents: number; payer: string; participants: string[] };
 export type SharedExpenses = { people: Person[]; expenses: Expense[] };
 export const emptySharedExpenses: SharedExpenses = { people: [], expenses: [] };
 
+export function encodeSharedExpenses(data: SharedExpenses): string {
+  return "1." + compressToEncodedURIComponent(JSON.stringify(data));
+}
+
 export function parseSharedExpenses(value: string | null): SharedExpenses {
   try {
-    const data = JSON.parse(value ?? "null");
+    const json = value?.startsWith("1.") ? decompressFromEncodedURIComponent(value.slice(2)) : value;
+    const data = JSON.parse(json ?? "null");
     if (!data || !Array.isArray(data.people) || !Array.isArray(data.expenses)) return emptySharedExpenses;
     const ids = new Set<string>();
     if (data.people.length > 100 || data.expenses.length > 1000) return emptySharedExpenses;
