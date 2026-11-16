@@ -235,9 +235,6 @@ export default function Home() {
         <button className={tab === "mortgage" ? "active" : ""} onClick={() => setTab("mortgage")}>
           {t("Kredyt hipoteczny")}
         </button>
-        <button className={tab === "expenses" ? "active" : ""} onClick={() => setTab("expenses")}>
-          {t("Wspólne wydatki")}
-        </button>
       </nav>
       {tab === "expenses" ? (
         <SharedBills data={sharedExpenses} onChange={setSharedExpenses} />
