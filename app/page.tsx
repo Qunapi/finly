@@ -49,7 +49,7 @@ const euros = new Intl.NumberFormat("pl-PL", {
 const quickAmounts = [20000, 25000, 30000, 40000, 50000, 60000];
 export default function Home() {
   const { t, language, ready: languageReady, setLanguage } = useLanguage();
-  const [tab, setTab] = useState<"salary" | "mortgage" | "expenses">("salary");
+  const [tab, setTab] = useState(defaultCalculatorState.tab);
   const [sharedExpenses, setSharedExpenses] = useState(emptySharedExpenses);
   const [amount, setAmount] = useState(15000);
   const [youthRelief, setYouthRelief] = useState(true);

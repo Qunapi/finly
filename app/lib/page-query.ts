@@ -64,7 +64,7 @@ export function parseCalculatorQuery(search: string, pathname = ""): CalculatorS
   return {
     tab: (() => {
       const tab = pathname.match(/\/(salary|mortgage|expenses)\/?$/)?.[1] ?? params.get("tab");
-      return tab === "mortgage" || tab === "expenses" ? tab : "salary";
+      return tab === "salary" || tab === "mortgage" || tab === "expenses" ? tab : defaultCalculatorState.tab;
     })(),
     purchaseCosts: {
       agent: boolean("feeAgent", true),
